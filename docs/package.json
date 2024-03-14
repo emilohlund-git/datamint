@@ -1,7 +1,7 @@
 {
-  "name": "nextra-docs-template",
+  "name": "datamint-docs",
   "version": "0.0.1",
-  "description": "Nextra docs template",
+  "description": "Datamint Documentation Website",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,9 +9,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shuding/nextra-docs-template.git"
+    "url": "git+https://github.com/emilohlund-git/datamint.git"
   },
-  "author": "Shu Ding <g@shud.in>",
+  "author": "Emil Ölund",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/shuding/nextra-docs-template/issues"
@@ -22,7 +22,8 @@
     "nextra": "latest",
     "nextra-theme-docs": "latest",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-icons": "^5.0.1"
   },
   "devDependencies": {
     "@types/node": "18.11.10",
