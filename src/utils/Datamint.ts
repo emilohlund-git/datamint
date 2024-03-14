@@ -31,11 +31,9 @@ export class Datamint {
     process.on("uncaughtException", () => {
       this.gracefulShutdown();
     });
-
-    (global as any)[`__${this.database.toUpperCase()}_DATAMINT__`] = this;
   }
 
-  async startDatabase() {
+  async startDockerContainer() {
     this.hasStartedProcessing = true;
     DatamintManager.addInstance(this);
 
@@ -83,15 +81,25 @@ export class Datamint {
     }
   }
 
-  async stopDatabase() {
+  async connectPlugin() {
+    await this._plugin.connect(this.getConnectionString());
+  }
+
+  async disconnectPlugin() {
+    await this._plugin.disconnect();
+  }
+
+  async resetPlugin() {
+    await this._plugin.reset(this.options.name);
+  }
+
+  async stopDockerContainer() {
     LoggerService.info(
       `Stopping ${this.database} Docker container...`,
       LogColor.CYAN,
       LogStyle.BRIGHT,
       Emoji[this.database.toUpperCase() as keyof typeof Emoji]
     );
-
-    await this._plugin.disconnect();
 
     try {
       await DockerService.stopContainer(this.dockerContainerPath);
@@ -147,7 +155,7 @@ export class Datamint {
     );
 
     try {
-      await this.stopDatabase();
+      await this.stopDockerContainer();
     } catch (error: any) {
       LoggerService.error(" Failed to clean up the Docker container.", error);
     }
@@ -186,7 +194,7 @@ export class Datamint {
       LogStyle.BRIGHT,
       Emoji[this.database.toUpperCase() as keyof typeof Emoji]
     );
-    await this.stopDatabase().catch((err) => {
+    await this.stopDockerContainer().catch((err) => {
       LoggerService.error("Failed to gracefully shut down the container.", err);
     });
 

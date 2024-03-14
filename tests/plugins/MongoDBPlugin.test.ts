@@ -1,31 +1,33 @@
-import { Emoji, LogColor, LogStyle } from "../../src/utils/enums";
+import { DatabaseType } from "../../src/utils/enums";
 import { MongoDBPlugin } from "../../src/plugins/MongoDBPlugin";
-import { LoggerService } from "../../src/utils/LoggerService";
+import { Datamint } from "../../src/utils/Datamint";
 
 describe("MongoDBPlugin", () => {
-  let plugin: MongoDBPlugin;
+  let datamint: Datamint;
   const collectionName = "test_collection";
 
   beforeAll(async () => {
-    plugin = global.__MONGODB_DATAMINT__?.plugin as MongoDBPlugin;
-    LoggerService.info(
-      `Starting Datamint: ${JSON.stringify(plugin)}`,
-      LogColor.MAGENTA,
-      LogStyle.BRIGHT,
-      Emoji.HOURGLASS
-    );
-    await plugin.client.db().createCollection(collectionName);
+    datamint = new Datamint(new MongoDBPlugin(), DatabaseType.MONGODB, {
+      name: "test",
+      password: "test",
+      user: "test",
+    });
+    
+    await datamint.connectPlugin();
+
+    await datamint.plugin.client.db().createCollection(collectionName);
   });
 
   afterAll(async () => {
-    await plugin.reset("test");
+    await datamint.resetPlugin();
+    await datamint.disconnectPlugin();
   });
 
   it("should insert data into the specified collection correctly", async () => {
     const mockData = [{ _id: 1, name: "John" }];
-    await plugin.insert(collectionName, mockData);
+    await datamint.plugin.insert(collectionName, mockData);
 
-    const result = await plugin.client
+    const result = await datamint.plugin.client
       .db()
       .collection(collectionName)
       .findOne({ _id: 1 as any });
@@ -46,9 +48,9 @@ describe("MongoDBPlugin", () => {
       { _id: 2, name: "Jane" },
       { _id: 3, name: "Doe" },
     ];
-    await plugin.insert(collectionName, mockData);
+    await datamint.plugin.insert(collectionName, mockData);
 
-    const result = await plugin.client
+    const result = await datamint.plugin.client
       .db()
       .collection(collectionName)
       .find({ _id: { $in: [2 as any, 3] } })
@@ -64,7 +66,7 @@ describe("MongoDBPlugin", () => {
 
   it("should retrieve data correctly", async () => {
     const _id = 1; // Assuming data is already inserted from previous tests
-    const result = await plugin.client
+    const result = await datamint.plugin.client
       .db()
       .collection(collectionName)
       .findOne({ _id } as any);
@@ -72,9 +74,9 @@ describe("MongoDBPlugin", () => {
   });
 
   it("should clean up the database correctly", async () => {
-    await plugin.client.db().collection(collectionName).deleteMany({});
+    await datamint.plugin.client.db().collection(collectionName).deleteMany({});
     // Optionally, verify the collection is empty
-    const result = await plugin.client
+    const result = await datamint.plugin.client
       .db()
       .collection(collectionName)
       .find({})

@@ -1,33 +1,35 @@
-import { Emoji, LogColor, LogStyle } from "../../src/utils/enums";
+import { DatabaseType } from "../../src/utils/enums";
 import { PostgreSQLPlugin } from "../../src/plugins/PostgreSQLPlugin";
-import { LoggerService } from "../../src/utils/LoggerService";
+import { Datamint } from "../../src/utils/Datamint";
 
 describe("PostgreSQLPlugin", () => {
-  let plugin: PostgreSQLPlugin;
+  let datamint: Datamint;
   const tableName = "your_table_name";
 
   beforeAll(async () => {
-    plugin = global.__POSTGRESQL_DATAMINT__?.plugin as PostgreSQLPlugin;
-    LoggerService.info(
-      `Starting Datamint: ${JSON.stringify(plugin)}`,
-      LogColor.MAGENTA,
-      LogStyle.BRIGHT,
-      Emoji.HOURGLASS
-    );
-    await plugin.client.query(
+    datamint = new Datamint(new PostgreSQLPlugin(), DatabaseType.POSTGRESQL, {
+      name: "test",
+      password: "test",
+      user: "test",
+    });
+
+    await datamint.connectPlugin();
+
+    await datamint.plugin.client.query(
       `CREATE TABLE IF NOT EXISTS ${tableName} (id INT, name VARCHAR(255))`
     );
   });
 
   afterAll(async () => {
-    await plugin.reset("test");
+    await datamint.resetPlugin();
+    await datamint.disconnectPlugin();
   });
 
   it("should insert data into the specified table correctly", async () => {
     const mockData = [{ id: 1, name: "John" }];
-    await plugin.insert(tableName, mockData);
+    await datamint.plugin.insert(tableName, mockData);
 
-    const result = await plugin.client.query(
+    const result = await datamint.plugin.client.query(
       `SELECT * FROM ${tableName} WHERE id = 1`
     );
     expect(result.rows).toEqual(
@@ -49,9 +51,9 @@ describe("PostgreSQLPlugin", () => {
       { id: 2, name: "Jane" },
       { id: 3, name: "Doe" },
     ];
-    await plugin.insert(tableName, mockData);
+    await datamint.plugin.insert(tableName, mockData);
 
-    const result = await plugin.client.query(
+    const result = await datamint.plugin.client.query(
       `SELECT * FROM ${tableName} WHERE id IN (2, 3)`
     );
     expect(result.rows.length).toBe(2);
@@ -66,12 +68,12 @@ describe("PostgreSQLPlugin", () => {
   it("should handle insert errors gracefully", async () => {
     const mockData = [{ id: 4, name: "Error" }];
     const nonExistentTable = "non_existent_table";
-    await expect(plugin.insert(nonExistentTable, mockData)).rejects.toThrow();
+    await expect(datamint.plugin.insert(nonExistentTable, mockData)).rejects.toThrow();
   });
 
   it("should retrieve data correctly", async () => {
     const id = 1; // Assuming data is already inserted from previous tests
-    const result = await plugin.client.query(
+    const result = await datamint.plugin.client.query(
       `SELECT * FROM ${tableName} WHERE id = $1`,
       [id]
     );
@@ -81,9 +83,9 @@ describe("PostgreSQLPlugin", () => {
   });
 
   it("should clean up the database correctly", async () => {
-    await plugin.client.query(`TRUNCATE TABLE ${tableName}`);
+    await datamint.plugin.client.query(`TRUNCATE TABLE ${tableName}`);
     // Optionally, verify the table is empty
-    const result = await plugin.client.query(`SELECT * FROM ${tableName}`);
+    const result = await datamint.plugin.client.query(`SELECT * FROM ${tableName}`);
     expect(result.rows.length).toBe(0);
   });
 });

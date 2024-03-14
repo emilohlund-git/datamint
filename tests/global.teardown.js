@@ -5,7 +5,7 @@ module.exports = async () => {
   const mysqlDatamint = global.__MYSQL_DATAMINT__;
   const mongodbDatamint = global.__MONGODB_DATAMINT__;
 
-  await postgresDatamint.stopDatabase(DatabaseType.POSTGRESQL);
-  await mysqlDatamint.stopDatabase(DatabaseType.MYSQL);
-  await mongodbDatamint.stopDatabase(DatabaseType.MONGODB);
+  await postgresDatamint.stopDockerContainer(DatabaseType.POSTGRESQL);
+  await mysqlDatamint.stopDockerContainer(DatabaseType.MYSQL);
+  await mongodbDatamint.stopDockerContainer(DatabaseType.MONGODB);
 };

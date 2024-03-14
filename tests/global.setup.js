@@ -3,8 +3,6 @@ const { PostgreSQLPlugin } = require("../src/plugins/PostgreSQLPlugin");
 const { DatabaseType } = require("../src/utils/enums/DatabaseType");
 const { MySQLPlugin } = require("../src/plugins/MySQLPlugin");
 const { MongoDBPlugin } = require("../src/plugins/MongoDBPlugin");
-const { LoggerService } = require("../src/utils/LoggerService");
-const { LogColor, LogStyle, Emoji } = require("../src/utils/enums");
 
 module.exports = async () => {
   const mysqlPlugin = new MySQLPlugin();
@@ -13,8 +11,8 @@ module.exports = async () => {
 
   const dbConfig = {
     name: "test",
-    user: "testuser",
-    password: "password",
+    user: "test",
+    password: "test",
   };
 
   const postgresDatamint = new Datamint(
@@ -29,45 +27,11 @@ module.exports = async () => {
     dbConfig
   );
 
-  LoggerService.info(
-    `Plugin: ${JSON.stringify(postgreSQLPlugin)}`,
-    LogColor.MAGENTA,
-    LogStyle.BRIGHT,
-    Emoji.HOURGLASS
-  );
-  LoggerService.info(
-    `Plugin: ${JSON.stringify(mysqlPlugin)}`,
-    LogColor.MAGENTA,
-    LogStyle.BRIGHT,
-    Emoji.HOURGLASS
-  );
-  LoggerService.info(
-    `Plugin: ${JSON.stringify(mongodbPlugin)}`,
-    LogColor.MAGENTA,
-    LogStyle.BRIGHT,
-    Emoji.HOURGLASS
-  );
+  await postgresDatamint.startDockerContainer();
+  await mysqlDatamint.startDockerContainer();
+  await mongodbDatamint.startDockerContainer();
 
-  LoggerService.info(
-    `Starting Datamint: ${JSON.stringify(postgresDatamint)}`,
-    LogColor.MAGENTA,
-    LogStyle.BRIGHT,
-    Emoji.HOURGLASS
-  );
-  LoggerService.info(
-    `Starting Datamint: ${JSON.stringify(mysqlDatamint)}`,
-    LogColor.MAGENTA,
-    LogStyle.BRIGHT,
-    Emoji.HOURGLASS
-  );
-  LoggerService.info(
-    `Starting Datamint: ${JSON.stringify(mongodbDatamint)}`,
-    LogColor.MAGENTA,
-    LogStyle.BRIGHT,
-    Emoji.HOURGLASS
-  );
-
-  await postgresDatamint.startDatabase();
-  await mysqlDatamint.startDatabase();
-  await mongodbDatamint.startDatabase();
+  global.__POSTGRESQL_DATAMINT__ = postgresDatamint;
+  global.__MYSQL_DATAMINT__ = mysqlDatamint;
+  global.__MONGODB_DATAMINT__ = mongodbDatamint;
 };

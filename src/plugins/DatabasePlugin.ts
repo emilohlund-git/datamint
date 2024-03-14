@@ -3,4 +3,5 @@ export interface DatabasePlugin {
   disconnect(): Promise<void>;
   reset(database: string): Promise<void>;
   insert(tableName: string, data: Record<string, any>[]): Promise<void>;
+  client: any;
 }

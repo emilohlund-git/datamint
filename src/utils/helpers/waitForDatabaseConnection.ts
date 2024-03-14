@@ -25,12 +25,14 @@ export const waitForDatabaseConnection = async (
       await plugin.connect(connectionString);
 
       stopSpinner();
-      return LoggerService.info(
+      LoggerService.info(
         ` Successfully connected to the ${database} database.`,
         LogColor.GREEN,
         LogStyle.BRIGHT,
         Emoji.CHECK
       );
+
+      return await plugin.disconnect();
     } catch (err: any) {
       attempts++;
       LoggerService.warning(
