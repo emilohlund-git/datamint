@@ -1,4 +1,6 @@
-import { PostgreSQLPlugin } from "@datamint/plugins/PostgreSQLPlugin";
+import { Emoji, LogColor, LogStyle } from "../../src/utils/enums";
+import { PostgreSQLPlugin } from "../../src/plugins/PostgreSQLPlugin";
+import { LoggerService } from "../../src/utils/LoggerService";
 
 describe("PostgreSQLPlugin", () => {
   let plugin: PostgreSQLPlugin;
@@ -6,6 +8,12 @@ describe("PostgreSQLPlugin", () => {
 
   beforeAll(async () => {
     plugin = global.__POSTGRESQL_DATAMINT__?.plugin as PostgreSQLPlugin;
+    LoggerService.info(
+      `Starting Datamint: ${JSON.stringify(plugin)}`,
+      LogColor.MAGENTA,
+      LogStyle.BRIGHT,
+      Emoji.HOURGLASS
+    );
     await plugin.client.query(
       `CREATE TABLE IF NOT EXISTS ${tableName} (id INT, name VARCHAR(255))`
     );

@@ -1,4 +1,6 @@
-import { MongoDBPlugin } from "@datamint/plugins/MongoDBPlugin";
+import { Emoji, LogColor, LogStyle } from "../../src/utils/enums";
+import { MongoDBPlugin } from "../../src/plugins/MongoDBPlugin";
+import { LoggerService } from "../../src/utils/LoggerService";
 
 describe("MongoDBPlugin", () => {
   let plugin: MongoDBPlugin;
@@ -6,6 +8,12 @@ describe("MongoDBPlugin", () => {
 
   beforeAll(async () => {
     plugin = global.__MONGODB_DATAMINT__?.plugin as MongoDBPlugin;
+    LoggerService.info(
+      `Starting Datamint: ${JSON.stringify(plugin)}`,
+      LogColor.MAGENTA,
+      LogStyle.BRIGHT,
+      Emoji.HOURGLASS
+    );
     await plugin.client.db().createCollection(collectionName);
   });
 

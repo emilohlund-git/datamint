@@ -1,4 +1,6 @@
-import { MySQLPlugin } from "@datamint/plugins/MySQLPlugin";
+import { Emoji, LogColor, LogStyle } from "../../src/utils/enums";
+import { MySQLPlugin } from "../../src/plugins/MySQLPlugin";
+import { LoggerService } from "../../src/utils/LoggerService";
 import { RowDataPacket } from "mysql2";
 
 describe("MySQLPlugin", () => {
@@ -7,6 +9,12 @@ describe("MySQLPlugin", () => {
 
   beforeAll(async () => {
     plugin = global.__MYSQL_DATAMINT__?.plugin as MySQLPlugin;
+    LoggerService.info(
+      `Starting Datamint: ${JSON.stringify(plugin)}`,
+      LogColor.MAGENTA,
+      LogStyle.BRIGHT,
+      Emoji.HOURGLASS
+    );
     await plugin.client.query(
       `CREATE TABLE IF NOT EXISTS ${tableName} (id INT, name VARCHAR(255))`
     );
