@@ -1,14 +1,13 @@
 import mysql from "mysql2/promise";
 import { DatabasePlugin } from "./DatabasePlugin";
 
-export class MySQLPlugin implements DatabasePlugin<mysql.Connection, null> {
+export class MySQLPlugin implements DatabasePlugin {
   private _client: mysql.Connection | null = null;
 
-  async connect(connectionString: string): Promise<mysql.Connection> {
+  async connect(connectionString: string): Promise<void> {
     try {
       this._client = await mysql.createConnection(connectionString);
       await this._client.connect();
-      return this._client;
     } catch (error) {
       this._client = null;
       throw error;
@@ -52,9 +51,5 @@ export class MySQLPlugin implements DatabasePlugin<mysql.Connection, null> {
       throw new Error("Not connected to a database");
     }
     return this._client;
-  }
-
-  get db(): null {
-    return null;
   }
 }

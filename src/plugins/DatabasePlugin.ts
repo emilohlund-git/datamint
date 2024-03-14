@@ -1,8 +1,7 @@
-export interface DatabasePlugin<T, U> {
-  connect(connectionString: string): Promise<T>;
+export interface DatabasePlugin {
+  connect(connectionString: string): Promise<void>;
   disconnect(): Promise<void>;
   reset(database: string): Promise<void>;
   insert(tableName: string, data: Record<string, any>[]): Promise<void>;
-  client: T;
-  db: U;
+  client: any;
 }
