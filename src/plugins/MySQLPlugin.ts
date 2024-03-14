@@ -4,10 +4,11 @@ import { DatabasePlugin } from "./DatabasePlugin";
 export class MySQLPlugin implements DatabasePlugin<mysql.Connection, null> {
   private _client: mysql.Connection | null = null;
 
-  async connect(connectionString: string): Promise<void> {
+  async connect(connectionString: string): Promise<mysql.Connection> {
     try {
       this._client = await mysql.createConnection(connectionString);
       await this._client.connect();
+      return this._client;
     } catch (error) {
       this._client = null;
       throw error;

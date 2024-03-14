@@ -4,9 +4,10 @@ import { DatabasePlugin } from "./DatabasePlugin";
 export class PostgreSQLPlugin implements DatabasePlugin<Client, null> {
   private _client: Client;
 
-  async connect(connectionString: string): Promise<void> {
+  async connect(connectionString: string): Promise<Client> {
     this._client = new Client(connectionString);
     await this._client.connect();
+    return this._client;
   }
 
   async reset(database: string): Promise<void> {

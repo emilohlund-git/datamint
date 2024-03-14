@@ -5,10 +5,11 @@ export class MongoDBPlugin implements DatabasePlugin<MongoClient, Db> {
   private _client: MongoClient;
   private _db: Db;
 
-  async connect(connectionString: string): Promise<void> {
+  async connect(connectionString: string): Promise<MongoClient> {
     this._client = new MongoClient(connectionString);
     await this._client.connect();
     this._db = this._client.db();
+    return this._client;
   }
 
   async reset(database: string): Promise<void> {
