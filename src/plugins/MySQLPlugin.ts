@@ -1,7 +1,7 @@
 import mysql from "mysql2/promise";
 import { DatabasePlugin } from "./DatabasePlugin";
 
-export class MySQLPlugin implements DatabasePlugin {
+export class MySQLPlugin implements DatabasePlugin<mysql.Connection> {
   private _client: mysql.Connection | null = null;
 
   async connect(connectionString: string): Promise<void> {

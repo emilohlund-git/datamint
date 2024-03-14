@@ -1,7 +1,7 @@
 import { MongoClient, Db } from "mongodb";
 import { DatabasePlugin } from "./DatabasePlugin";
 
-export class MongoDBPlugin implements DatabasePlugin {
+export class MongoDBPlugin implements DatabasePlugin<MongoClient> {
   private _client: MongoClient;
   private _db: Db;
 

@@ -3,9 +3,9 @@ import { LoggerService } from "../../utils/LoggerService";
 import { Spinners } from "../../utils/constants";
 import { DatabaseType, Emoji, LogColor, LogStyle } from "../../utils/enums";
 
-export const waitForDatabaseConnection = async (
+export const waitForDatabaseConnection = async <T>(
   connectionString: string,
-  plugin: DatabasePlugin,
+  plugin: DatabasePlugin<T>,
   database: DatabaseType,
   maxAttempts = 20,
   interval = 3000

@@ -1,7 +1,7 @@
 import { Client } from "pg";
 import { DatabasePlugin } from "./DatabasePlugin";
 
-export class PostgreSQLPlugin implements DatabasePlugin {
+export class PostgreSQLPlugin implements DatabasePlugin<Client> {
   private _client: Client;
 
   async connect(connectionString: string): Promise<void> {

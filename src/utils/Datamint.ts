@@ -8,16 +8,16 @@ import { LogStyle, LogColor, Emoji, DatabaseType } from "./enums";
 import { DOCKER_DIR, INIT_MONGO_FILE, COMPOSE_FILE } from "./constants";
 import { DatamintManager } from "./DatamintManager";
 
-export class Datamint {
+export class Datamint<T> {
   private hasStartedProcessing = false;
   private dockerContainerPath: string;
   private tempDir: string;
-  private _plugin: DatabasePlugin;
+  private _plugin: DatabasePlugin<T>;
   private database: DatabaseType;
   private options: DatabaseOptions;
 
   constructor(
-    plugin: DatabasePlugin,
+    plugin: DatabasePlugin<T>,
     database: DatabaseType,
     options: DatabaseOptions
   ) {
