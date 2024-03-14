@@ -1,7 +1,7 @@
 import { Client } from "pg";
 import { DatabasePlugin } from "./DatabasePlugin";
 
-export class PostgreSQLPlugin implements DatabasePlugin<Client> {
+export class PostgreSQLPlugin implements DatabasePlugin<Client, null> {
   private _client: Client;
 
   async connect(connectionString: string): Promise<void> {
@@ -45,5 +45,9 @@ export class PostgreSQLPlugin implements DatabasePlugin<Client> {
       throw new Error("Not connected to a database");
     }
     return this._client;
+  }
+
+  get db(): null {
+    return null;
   }
 }
