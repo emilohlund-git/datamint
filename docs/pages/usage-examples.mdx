@@ -1,1 +1,30 @@
 # Usage Examples
+
+There are a few scenarios where `Datamint` can be useful for you.
+
+## Testing with Mock Data
+
+One of the most common use cases for `Datamint` is in testing environments where you need to mock data
+into a real database. Instead of manually settings up a database and populating it with mock data, you can use
+`Datamint` to automate this process. This not only saves you time but also ensures that your tests are always
+running against the most up-to-date version of your database schema.
+
+## Docker Container Management
+
+`Datamint` also simplifies the process of managing Docker containers for your databases. With `Datamint`, you can easily spin up Docker containers before a test suite and tear them down afterwards. This "automagical" process ensures that each test suite runs in a clean environment, reducing the risk of tests interfering with each other and improving the reliability of your test suites.
+
+## Easy Database Setup for Small Applications
+
+While not it&apos;s primary intended use case, `Datamint` can also be used to quickly set up databases for smaller applications.
+Although this is not recommended for larger, more complex applications, it can be a convenient solution for smaller proejcts that don&apos;t
+require a full-fledged database management system.
+
+## Full Control Over Database Connections
+
+With `Datamint`, you have full control over the lifecycle of your database connections. You can manually spin up and tear down containers as needed, giving you
+the flexibility to manage your database connections in a way that best suits your application&apos;s needs. Whether you&apos;re running a complex test suite or simply need a quick
+and easy way to set up a database for a small application, `Datamint` gives you the tools you need to manage your databases effectively and efficiently.
+
+## Next Steps
+
+Take a look at the usage examples to find out how to implement `Datamint` with popular testing frameworks. Maybe start with [Jest](usage-examples/jest.mdx)?
