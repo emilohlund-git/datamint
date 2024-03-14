@@ -66,6 +66,8 @@ module.exports = async () => {
   );
 
   await presgresDatamint.startDatabase();
+
+  global.__POSTGRESQL__DATAMINT__ = postgresDatamint;
 };
 ```
 
@@ -92,21 +94,29 @@ describe("PostgreSQLPlugin", () => {
   const tableName = "your_table_name";
 
   beforeAll(async () => {
-    plugin = new PostgreSQLPlugin();
-    await plugin.client.query(
+    datamint = new Datamint(new MySQLPlugin(), DatabaseType.MYSQL, {
+      name: "test",
+      password: "test",
+      user: "test",
+    });
+    
+    await datamint.connectPlugin();
+
+    await datamint.plugin.client.query(
       `CREATE TABLE IF NOT EXISTS ${tableName} (id INT, name VARCHAR(255))`
     );
   });
 
   afterAll(async () => {
-    await plugin.reset("test");
+    await datamint.resetPlugin();
+    await datamint.disconnectPlugin();
   });
 
   it("should insert data into the specified table correctly", async () => {
     const mockData = [{ id: 1, name: "John" }];
-    await plugin.insert(tableName, mockData);
+    await datamint.plugin.insert(tableName, mockData);
 
-    const result = await plugin.client.query(
+    const result = await datamint.plugin.client.query(
       `SELECT * FROM ${tableName} WHERE id = 1`
     );
     expect(result.rows).toEqual(
