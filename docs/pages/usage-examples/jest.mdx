@@ -1,0 +1,163 @@
+# Usage Examples with Jest
+
+Welcome to the usage examples guide for Datamint with Jest! This guide will show you how to use Datamint in your Jest test suites.
+
+## Setting Up a Dockerized Database for Jest Tests
+
+You can use Jest's setup and teardown methods to manage your Dockerized databases. Here's an example of how you can do it:
+
+```ts filename="jest.config.ts" copy
+import type { Config } from "jest";
+
+const config: Config = {
+  testEnvironment: "node",
+  globalSetup: "./tests/global.setup.js",
+  globalTeardown: "./tests/global.teardown.js",
+};
+
+export default config;
+```
+
+Start by defining the paths to your global setup and global teardown scripts in your Jest config.
+
+```js filename="global.setup.js" copy
+const { Datamint, PostgreSQLPlugin, DatabaseType } = require("datamint");
+
+const config = {
+  name: "testdb",
+  user: "testuser",
+  password: "testpassword",
+};
+
+module.exports = async () => {
+  const mint = new Datamint(
+    new PostgreSQLPlugin(),
+    DatabaseType.POSTGRESQL,
+    config
+  );
+
+  await mint.startDockerContainer();
+
+  global.__MINT__ = mint;
+};
+```
+
+Here we are making sure that we are awaiting the process of spinning up the Docker container. The `startDockerContainer`
+method will also make sure that the Dockerized database is actually running and accepts connections. We are saving the `mint`
+object to a global variable, just to make sure we can access the same instance on teardown, but this can be done in multiple ways.
+
+```js filename="global.teardown.js" copy
+const { DatabaseType } = require("datamint");
+
+module.exports = async () => {
+  const mint = global.__MINT__;
+  await mint.stopDockerContainer();
+};
+```
+
+The `stopDockerContainer` method will do two things:
+
+1. Take down the Docker container.
+2. Remove any temporary files & directories used by the application.
+
+Should any of these processes fail and cause an error, there are failsafe mechanisms in place to make sure that the resources are brought down in a graceful manner.
+
+## Using the Dockerized Database in Jest Tests
+
+So now all the prerequisites are in place, and we can use Datamint in our test suites. This is how we can achieve that:
+
+```ts filename="pg.test.ts" copy
+describe("Datamint Test", () => {
+  let datamint: Datamint<PostgreSQLPlugin>;
+  const tableName = "your_table_name";
+
+  beforeAll(async () => {
+    datamint = new Datamint(new PostgreSQLPlugin(), DatabaseType.POSTGRESQL, {
+      name: "test",
+      password: "test",
+      user: "test",
+    });
+
+    await datamint.connectPlugin();
+
+    await datamint.plugin.client.none(
+      `CREATE TABLE IF NOT EXISTS ${tableName} (id INT, name VARCHAR(255))`
+    );
+  });
+
+  afterAll(async () => {
+    await datamint.resetPlugin();
+    await datamint.disconnectPlugin();
+  });
+
+  it("should insert data into the specified table correctly", async () => {
+    const mockData = [{ id: 1, name: "John" }];
+    await datamint.plugin.insert(tableName, mockData);
+
+    const result = await datamint.plugin.client.any(
+      `SELECT * FROM ${tableName} WHERE id = 1`
+    );
+    expect(result).toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: 1, name: "John" })])
+    );
+  });
+});
+```
+
+We do not need to set up any Docker container logic at this point, we handled all of this in the global setup and teardown scripts.
+You can choose to do so in the `beforeAll` and `afterAll` methods if you wish. But considering it takes a little while to spin up Docker containers,
+I would recommend an approach where you handle this logic before and after the test suite lifecycle.
+
+Another way to do it is by just instantiating a `DatabasePlugin` of choice, and connect the plugin that way instead.
+That approach would look like this:
+
+```ts filename="pg.test.ts" copy
+describe("Datamint Test", () => {
+  let plugin: PostgreSQLPlugin;
+  const connectionString = "postgresql://{user}:{password}@localhost:5432/{db}";
+  const tableName = "your_table_name";
+
+  beforeAll(async () => {
+    plugin = new PostgreSQLPlugin();
+
+    await plugin.connectPlugin(connectionString);
+
+    await plugin.client.none(
+      `CREATE TABLE IF NOT EXISTS ${tableName} (id INT, name VARCHAR(255))`
+    );
+  });
+
+  afterAll(async () => {
+    await plugin.reset();
+    await plugin.disconnect();
+  });
+
+  it("should insert data into the specified table correctly", async () => {
+    const mockData = [{ id: 1, name: "John" }];
+    await plugin.insert(tableName, mockData);
+
+    const result = await plugin.client.any(
+      `SELECT * FROM ${tableName} WHERE id = 1`
+    );
+    expect(result).toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: 1, name: "John" })])
+    );
+  });
+});
+```
+
+We lose the benefit of having a dynamic connection string created for us, which we in the case of using the `Datamint` object, we don't have to specify.
+
+## Conclusion
+
+In this guide, we've explored how to use Datamint with Jest for your testing needs. We started with the prerequisites, setting up a Dockerized database for Jest tests, and then dove into how to use this setup in your Jest tests.
+
+Using Datamint with Jest provides several benefits. It simplifies the process of setting up and tearing down Dockerized databases for your tests, ensuring a clean state for each test run. This makes your tests more reliable and easier to manage.
+
+Furthermore, Datamint's flexibility allows you to use it with different database types, making it a versatile tool for your testing needs.
+
+Remember, the key to effective testing is a reliable and repeatable test setup. With Datamint and Jest, you can achieve this with ease.
+
+## Next Steps
+
+Congratulations, you've just used Datamint in your Jest test suites! From here, you can start using Datamint in more complex testing scenarios. If you have any questions or run into any issues, feel free to contact me. Happy testing!

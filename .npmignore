@@ -1,0 +1,15 @@
+node_modules/
+*.map
+tests/
+.git/
+.github/
+jest.config.ts
+jest.setup.ts
+cert.pem
+key.pem
+commitlint.config.js
+docs/
+.env.*
+.env
+src/
+tsconfig.json

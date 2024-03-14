@@ -1,0 +1,56 @@
+{
+  "name": "datamint",
+  "version": "1.0.0",
+  "description": "Dockerized databases for development",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "repository": {
+    "url": "git+https://github.com/emilohlund-git/datamint.git"
+  },
+  "release": {
+    "branches": [
+      "main"
+    ],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/npm"
+    ]
+  },
+  "scripts": {
+    "build": "tsc && npm run copy",
+    "prepare": "npm run build",
+    "copy": "copyfiles -u 1 src/docker/* dist",
+    "test": "jest",
+    "coverage": "jest --coverage && cat ./coverage/lcov.info | coveralls"
+  },
+  "keywords": [
+    "docker",
+    "database",
+    "development"
+  ],
+  "author": "Emil Ölund",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.27",
+    "autoprefixer": "^10.4.18",
+    "copyfiles": "^2.4.1",
+    "coveralls": "^3.1.1",
+    "daisyui": "^4.7.3",
+    "jest": "^29.7.0",
+    "postcss": "^8.4.35",
+    "semantic-release": "^23.0.2",
+    "tailwindcss": "^3.4.1",
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.2"
+  },
+  "dependencies": {
+    "mongodb": "^6.5.0",
+    "mysql2": "^3.9.2",
+    "pg-promise": "^11.5.4",
+    "react-icons": "^5.0.1",
+    "rimraf": "^5.0.5"
+  }
+}

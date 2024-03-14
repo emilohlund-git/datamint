@@ -1,0 +1,57 @@
+import "tailwindcss/tailwind.css";
+import Box from "../components/Box";
+
+# Introduction
+
+<div role="alert" className="alert alert-warning rounded-sm mt-4">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="stroke-current shrink-0 h-6 w-6"
+    fill="none"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+    />
+  </svg>
+  <span>These document pages are under construction!</span>
+</div>
+
+Welcome to Datamint!
+
+Datamint is a utility library designed to simplify the process of setting up and tearing down Dockerized databases for testing purposes. It is a powerful tool for developers who frequently work with databases in their testing environments.
+
+## What is Datamint?
+
+Datamint is a library that provides an easy way to set up and tear down Dockerized databases. It currently supports MongoDB, MySQL, and PostgreSQL. The library is designed to work with minimal configuration, making it a convenient tool for developers.
+
+## Features
+
+- Easy setup and teardown: Datamint simplifies the process of setting up and tearing down Dockerized databases, making it easier to manage your testing environment.
+- Supports multiple databases: Datamint currently supports MongoDB, MySQL, and PostgreSQL, providing flexibility for your testing needs.
+- Minimal configuration required: Datamint is designed to work with minimal configuration, making it a convenient tool for developers.
+
+## How does it work?
+
+The Datamint library uses a Datamint class alongside a DatabasePlugin to spin up and tear down Docker containers before and after test lifecycles. The Docker containers are defined based on the options you pass in to the Datamint class.
+
+For example, the following code will spin up a Docker container with the latest PostgreSQL image, creating a "test" database, and a user with the specified credentials. It will then generate a connection string based on these arguments and connect to the dockerized database.
+
+```ts filename="demo.ts" copy
+const config = {
+  name: "test",
+  user: "testuser",
+  password: "password",
+};
+
+const mint = new Datamint(
+  new PostgreSQLPlugin(),
+  DatabaseType.POSTGRESQL,
+  dbConfig
+);
+
+mint.startDockerContainer();
+```

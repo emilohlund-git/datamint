@@ -1,0 +1,58 @@
+# Getting Started with Datamint
+
+Welcome to the getting started guide for Datamint! This guide will walk you through the process of setting up and tearing down Dockerized databases using Datamint.
+
+## Prerequisites
+
+Before you start, make sure you have the following software installed:
+
+- Node.js
+- Docker
+- Datamint: You can install it using npm (npm install datamint) or yarn (yarn add datamint).
+
+## Setting Up a Dockerized Database
+
+Let's start by setting up a Dockerized PostgreSQL database. Here's how you can do it:
+
+```ts
+import { Datamint, PostgreSQLPlugin, DatabaseType } from "datamint";
+
+const config = {
+  name: "test",
+  user: "testuser",
+  password: "password",
+};
+
+const mint = new Datamint(
+  new PostgreSQLPlugin(),
+  DatabaseType.POSTGRESQL,
+  config
+);
+
+mint.startDockerContainer();
+```
+
+### Under the Hood
+
+Datamint will parse the configs to a docker-compose file and spin up a temporary container with the config options.
+
+In this case, since we're using a Postgres image, on localhost:5432. Under the hood Datamint also uses the Docker
+variables to generate a connection string to connect to the container.
+
+## Tearing Down a Dockerized Database
+
+After you're done with your tests, you can tear down the Dockerized database like this:
+
+```ts
+await mint.stopDockerContainer();
+```
+
+This will start an asynchronous operation that will not resolve until the temporary files regarding the docker instance, 
+alongside the temporary containers are brought down. Should there be any errors there are plenty of listeners making sure
+that the resources are brought down gracefully.
+
+## Next Steps 
+
+Congratulations, you've just set up and torn down your first Dockerized database with Datamint! From here, you can start using Datamint in your test suites. Check out the [Usage Examples](usage-examples.mdx) page to see how you can use Datamint with Jest.
+
+If you have any questions or run into any issues, feel free to contact us. Happy testing!
