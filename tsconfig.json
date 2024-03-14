@@ -8,13 +8,14 @@
     "esModuleInterop": true,
     "sourceMap": true,
     "declaration": true,
+    "typeRoots": ["node_modules/@types"],
     "forceConsistentCasingInFileNames": true,
     "strictPropertyInitialization": false,
     "resolveJsonModule": true,
     "moduleResolution": "Node",
     "noLib": false,
     "baseUrl": ".",
-    "types": ["node"]
+    "types": ["node", "pg"]
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts"],
   "exclude": ["node_modules", "**/*.spec.ts", "dist", "coverage"]
