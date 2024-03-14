@@ -2,7 +2,7 @@ import { MongoDBPlugin } from "@datamint/plugins/MongoDBPlugin";
 
 describe("MongoDBPlugin", () => {
   let plugin: MongoDBPlugin;
-  const collectionName = "your_collection_name";
+  const collectionName = "test_collection";
 
   beforeAll(async () => {
     plugin = global.__MONGODB_DATAMINT__?.plugin as MongoDBPlugin;

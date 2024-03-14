@@ -4,6 +4,9 @@
   "description": "Dockerized databases for development",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "repository": {
+    "url": "git+https://github.com/emilohlund-git/datamint.git"
+  },
   "release": {
     "branches": [
       "main"
@@ -16,8 +19,10 @@
   },
   "scripts": {
     "build": "tsc && npm run copy",
+    "prepare": "npm run build",
     "copy": "copyfiles -u 1 src/docker/* dist",
-    "test": "jest"
+    "test": "jest",
+    "coverage": "jest --coverage && cat ./coverage/lcov.info | coveralls"
   },
   "keywords": [
     "docker",
