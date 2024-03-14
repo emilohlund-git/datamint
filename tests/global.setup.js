@@ -3,6 +3,8 @@ const { PostgreSQLPlugin } = require("../src/plugins/PostgreSQLPlugin");
 const { DatabaseType } = require("../src/utils/enums/DatabaseType");
 const { MySQLPlugin } = require("../src/plugins/MySQLPlugin");
 const { MongoDBPlugin } = require("../src/plugins/MongoDBPlugin");
+const { LoggerService } = require("../src/utils/LoggerService");
+const { LogColor, LogStyle, Emoji } = require("../src/utils/enums");
 
 module.exports = async () => {
   const mysqlPlugin = new MySQLPlugin();
@@ -15,7 +17,7 @@ module.exports = async () => {
     password: "password",
   };
 
-  const presgresDatamint = new Datamint(
+  const postgresDatamint = new Datamint(
     postgreSQLPlugin,
     DatabaseType.POSTGRESQL,
     dbConfig
@@ -27,7 +29,45 @@ module.exports = async () => {
     dbConfig
   );
 
-  await presgresDatamint.startDatabase();
+  LoggerService.info(
+    `Plugin: ${JSON.stringify(postgreSQLPlugin)}`,
+    LogColor.MAGENTA,
+    LogStyle.BRIGHT,
+    Emoji.HOURGLASS
+  );
+  LoggerService.info(
+    `Plugin: ${JSON.stringify(mysqlPlugin)}`,
+    LogColor.MAGENTA,
+    LogStyle.BRIGHT,
+    Emoji.HOURGLASS
+  );
+  LoggerService.info(
+    `Plugin: ${JSON.stringify(mongodbPlugin)}`,
+    LogColor.MAGENTA,
+    LogStyle.BRIGHT,
+    Emoji.HOURGLASS
+  );
+
+  LoggerService.info(
+    `Starting Datamint: ${JSON.stringify(postgresDatamint)}`,
+    LogColor.MAGENTA,
+    LogStyle.BRIGHT,
+    Emoji.HOURGLASS
+  );
+  LoggerService.info(
+    `Starting Datamint: ${JSON.stringify(mysqlDatamint)}`,
+    LogColor.MAGENTA,
+    LogStyle.BRIGHT,
+    Emoji.HOURGLASS
+  );
+  LoggerService.info(
+    `Starting Datamint: ${JSON.stringify(mongodbDatamint)}`,
+    LogColor.MAGENTA,
+    LogStyle.BRIGHT,
+    Emoji.HOURGLASS
+  );
+
+  await postgresDatamint.startDatabase();
   await mysqlDatamint.startDatabase();
   await mongodbDatamint.startDatabase();
 };

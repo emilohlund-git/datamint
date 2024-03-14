@@ -1,6 +1,6 @@
 # Datamint
 
-![npm](https://img.shields.io/npm/v/database-test-utils)
+![npm](https://img.shields.io/npm/v/datamint)
 
 Datamint is a utility library that simplifies setting up and tearing down Dockerized databases for testing purposes. It currently supports MongoDB, MySQL, and PostgreSQL.
 
