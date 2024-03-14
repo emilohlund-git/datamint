@@ -7,7 +7,7 @@ const config: DocsThemeConfig = {
   project: {
     link: "https://github.com/emilohlund-git/datamint",
   },
-  docsRepositoryBase: "https://github.com/emilohlund-git/datamint/docs",
+  docsRepositoryBase: "https://github.com/emilohlund-git/datamint/tree/main/docs",
   footer: {
     text: <Logo />,
   },
