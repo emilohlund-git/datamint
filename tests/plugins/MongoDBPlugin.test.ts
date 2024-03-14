@@ -3,7 +3,7 @@ import { MongoDBPlugin } from "../../src/plugins/MongoDBPlugin";
 import { Datamint } from "../../src/utils/Datamint";
 
 describe("MongoDBPlugin", () => {
-  let datamint: Datamint;
+  let datamint: Datamint<MongoDBPlugin>;
   const collectionName = "test_collection";
 
   beforeAll(async () => {

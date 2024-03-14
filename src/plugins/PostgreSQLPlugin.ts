@@ -1,12 +1,12 @@
-import { Client as PgClient } from "pg";
+import pgPromise, { IDatabase } from "pg-promise";
 import { DatabasePlugin } from "./DatabasePlugin";
 
 export class PostgreSQLPlugin implements DatabasePlugin {
-  private _client: PgClient;
+  private _client: IDatabase<any>;
 
   async connect(connectionString: string): Promise<void> {
-    this._client = new PgClient(connectionString);
-    await this._client.connect();
+    const pgp = pgPromise();
+    this._client = pgp(connectionString);
   }
 
   async reset(database: string): Promise<void> {
@@ -14,15 +14,11 @@ export class PostgreSQLPlugin implements DatabasePlugin {
       throw new Error("Not connected to a database");
     }
 
-    await this._client.query("DROP SCHEMA public CASCADE");
-    await this._client.query("CREATE SCHEMA public");
+    await this._client.none("DROP SCHEMA public CASCADE");
+    await this._client.none("CREATE SCHEMA public");
   }
 
-  async disconnect(): Promise<void> {
-    if (this._client) {
-      await this._client.end();
-    }
-  }
+  async disconnect(): Promise<void> {}
 
   async insert(tableName: string, data: Record<string, any>[]): Promise<void> {
     if (!this._client) {
@@ -36,11 +32,11 @@ export class PostgreSQLPlugin implements DatabasePlugin {
         .join(", "); // Creates placeholders like $1, $2
       const values = Object.values(row);
       const query = `INSERT INTO ${tableName} (${fields}) VALUES (${placeholders});`;
-      await this._client.query(query, values); // Pass values as the second parameter for parameterized query
+      await this._client.none(query, values); // Pass values as the second parameter for parameterized query
     }
   }
 
-  get client(): PgClient {
+  get client(): IDatabase<any> {
     if (!this._client) {
       throw new Error("Not connected to a database");
     }

@@ -4,7 +4,7 @@ import { RowDataPacket } from "mysql2";
 import { Datamint } from "../../src/utils/Datamint";
 
 describe("MySQLPlugin", () => {
-  let datamint: Datamint;
+  let datamint: Datamint<MySQLPlugin>;
   const tableName = "your_table_name";
 
   beforeAll(async () => {
