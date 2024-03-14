@@ -1,0 +1,10 @@
+.env.development
+.env
+.git
+node_modules
+cert.pem
+key.pem
+coverage
+public
+.vscode
+dist

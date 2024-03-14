@@ -1,0 +1,36 @@
+name: Run Tests and Coverage
+on: [push, pull_request]
+
+jobs:
+  check_changes:
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@v5
+        with:
+          paths: '["tests/**"]'
+
+  test:
+    needs: check_changes
+    if: ${{ needs.check_changes.outputs.should_skip == 'false' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚀 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: 📡 Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: 🔄 Install dependencies
+        run: npm ci
+      - name: 🧪 Run tests with coverage
+        run: npm test -- --coverage
+      - name: 📊 Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
