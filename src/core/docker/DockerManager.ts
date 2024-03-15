@@ -129,6 +129,7 @@ export class DockerManager<T extends DatabasePlugin> extends Observer<
     );
 
     try {
+      await this.fileProcessor.cleanupTempDir(this.tempDir);
       await this.service.stopContainer(this.dockerContainerPath);
       this.isContainerRunning = false;
       LoggerService.info(
