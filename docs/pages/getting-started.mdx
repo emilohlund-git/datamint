@@ -7,7 +7,7 @@ Welcome to the getting started guide for Datamint! This guide will walk you thro
 Let's start by setting up a Dockerized PostgreSQL database. Here's how you can do it:
 
 ```ts
-import { Datamint, PostgreSQLPlugin, DatabaseType } from "datamint";
+import { Datamint, DatabaseType } from "datamint";
 
 const config = {
   name: "test",
@@ -15,13 +15,9 @@ const config = {
   password: "password",
 };
 
-const mint = new Datamint(
-  new PostgreSQLPlugin(),
-  DatabaseType.POSTGRESQL,
-  config
-);
+const mint = new Datamint(DatabaseType.POSTGRESQL, config);
 
-mint.startDockerContainer();
+mint.start();
 ```
 
 ### Under the Hood
@@ -36,14 +32,14 @@ variables to generate a connection string to connect to the container.
 After you're done with your tests, you can tear down the Dockerized database like this:
 
 ```ts
-await mint.stopDockerContainer();
+await mint.stop();
 ```
 
-This will start an asynchronous operation that will not resolve until the temporary files regarding the docker instance, 
+This will start an asynchronous operation that will not resolve until the temporary files regarding the docker instance,
 alongside the temporary containers are brought down. Should there be any errors there are plenty of listeners making sure
 that the resources are brought down gracefully.
 
-## Next Steps 
+## Next Steps
 
 Congratulations, you've just set up and torn down your first Dockerized database with Datamint! From here, you can start using Datamint in your test suites. Check out the [Usage Examples](usage-examples.mdx) page to see how you can use Datamint with Jest.
 
