@@ -101,6 +101,30 @@ We do not need to set up any Docker container logic at this point, we handled al
 You can choose to do so in the `beforeAll` and `afterAll` methods if you wish. But considering it takes a little while to spin up Docker containers,
 I would recommend an approach where you handle this logic before and after the test suite lifecycle.
 
+## Providing a Custom Database Connection String
+
+If you have your own database and you're not using Datamint containers, you can provide your own connection string. Here's how you can do it:
+
+```ts filename="pg.test.ts" copy
+describe("Datamint Test", () => {
+  let datamint: DatamintClient<PostgreSQLPlugin>;
+  const tableName = "your_table_name";
+
+  beforeAll(async () => {
+    datamint = new DatamintClient(DatabaseType.POSTGRESQL);
+
+    await datamint.connect("your_database_connection_string");
+
+    await datamint.createTable(tableName, {
+      id: "SERIAL PRIMARY KEY",
+      name: "VARCHAR(255)",
+    });
+  });
+
+  // ... rest of the code
+});
+```
+
 ## Conclusion
 
 In this guide, we've explored how to use Datamint with Jest for your testing needs. We started with the prerequisites, setting up a Dockerized database for Jest tests, and then dove into how to use this setup in your Jest tests.

@@ -17,17 +17,18 @@ import { DatabaseOptions } from "../interfaces";
 
 export class DatamintClient<T extends DatabasePlugin> {
   private _plugin: T;
-  private options: DatabaseOptions;
+  private options?: DatabaseOptions;
   private database: DatabaseType;
 
-  constructor(database: DatabaseType, options: DatabaseOptions) {
+  constructor(database: DatabaseType, options?: DatabaseOptions) {
     this._plugin = this.createPlugin(database);
     this.options = options;
     this.database = database;
   }
 
-  async connect() {
-    await this._plugin.connect(this.getConnectionString());
+  async connect(connectionString?: string) {
+    const connection = connectionString || this.getConnectionString();
+    await this._plugin.connect(connection);
   }
 
   async disconnect() {
@@ -35,6 +36,7 @@ export class DatamintClient<T extends DatabasePlugin> {
   }
 
   async reset() {
+    if (!this.options) return;
     await this._plugin.reset(this.options.name);
   }
 
@@ -59,6 +61,10 @@ export class DatamintClient<T extends DatabasePlugin> {
   }
 
   private getConnectionString() {
+    if (!this.options) {
+      throw new Error(`⚠️ Database options are not provided.`);
+    }
+
     const connectionStrings: Record<DatabaseType, string> = {
       [DatabaseType.POSTGRESQL]: `postgres://${this.options.user}:${this.options.password}@localhost:5432/${this.options.name}`,
       [DatabaseType.MYSQL]: `mysql://${this.options.user}:${this.options.password}@localhost:3306/${this.options.name}`,
@@ -91,6 +97,8 @@ export class DatamintClient<T extends DatabasePlugin> {
   }
 
   checkDatabaseConnection = async (maxAttempts = 20, interval = 3000) => {
+    if (!this.options) return;
+
     const connectionString = this.getConnectionString();
 
     let attempts = 0;
