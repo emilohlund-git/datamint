@@ -1,9 +1,8 @@
 import pgPromise, { IDatabase } from "pg-promise";
-import { DatabasePlugin } from "./DatabasePlugin";
 import { DeleteQuery, FindQuery, InsertQuery, UpdateQuery } from "./types";
+import { BasePlugin } from "../plugins/BasePlugin";
 
-export class PostgreSQLPlugin implements DatabasePlugin {
-  private _client: IDatabase<any>;
+export class PostgreSQLPlugin extends BasePlugin<IDatabase<any>> {
   private _pgp: pgPromise.IMain;
 
   async connect(connectionString: string): Promise<void> {
@@ -20,17 +19,13 @@ export class PostgreSQLPlugin implements DatabasePlugin {
   }
 
   async reset(database: string): Promise<void> {
-    this.ensureConnection();
-
-    await this._client.none("DROP SCHEMA public CASCADE");
-    await this._client.none("CREATE SCHEMA public");
+    await this.client.none("DROP SCHEMA public CASCADE");
+    await this.client.none("CREATE SCHEMA public");
   }
 
   async disconnect(): Promise<void> {}
 
   async find(tableName: string, conditions: FindQuery): Promise<any[]> {
-    this.ensureConnection();
-
     const whereClauses = Object.entries(conditions)
       .map(([field, value], index) => {
         if (Array.isArray(value)) {
@@ -47,36 +42,28 @@ export class PostgreSQLPlugin implements DatabasePlugin {
     const values = Object.values(conditions).flat();
     const query = `SELECT * FROM ${tableName} WHERE ${whereClauses};`;
 
-    return this._client.manyOrNone(query, values);
+    return this.client.manyOrNone(query, values);
   }
 
   async update(tableName: string, query: UpdateQuery): Promise<any> {
-    this.ensureConnection();
-
     const sql = `UPDATE ${tableName} SET ${this.objectToSql(
       query.update
     )} WHERE ${this.objectToSql(query.filter)}`;
-    const [result] = await this._client?.query(sql);
+    const [result] = await this.client?.query(sql);
     return result;
   }
 
   async delete(tableName: string, query: DeleteQuery): Promise<any> {
-    this.ensureConnection();
-
     const sql = `DELETE FROM ${tableName} WHERE ${this.objectToSql(query)}`;
-    const [result] = await this._client?.query(sql);
+    const [result] = await this.client?.query(sql);
     return result;
   }
 
-  private objectToSql(query: object): string {
-    return Object.entries(query)
-      .map(([key, value]) => `${key} = ${this._pgp.as.value(value)}`)
-      .join(" AND ");
+  protected escapeValue(value: any): string {
+    return this._pgp.as.value(value);
   }
-
+ 
   async insert(tableName: string, data: InsertQuery): Promise<void> {
-    this.ensureConnection();
-
     for (const row of data) {
       const fields = Object.keys(row).join(", ");
       const placeholders = Object.keys(row)
@@ -84,7 +71,7 @@ export class PostgreSQLPlugin implements DatabasePlugin {
         .join(", "); // Creates placeholders like $1, $2
       const values = Object.values(row);
       const query = `INSERT INTO ${tableName} (${fields}) VALUES (${placeholders});`;
-      await this._client.none(query, values); // Pass values as the second parameter for parameterized query
+      await this.client.none(query, values); // Pass values as the second parameter for parameterized query
     }
   }
 
@@ -92,26 +79,12 @@ export class PostgreSQLPlugin implements DatabasePlugin {
     tableName: string,
     schema: Record<string, string>
   ): Promise<void> {
-    this.ensureConnection();
-
     const fields = Object.entries(schema)
       .map(([columnName, columnType]) => `${columnName} ${columnType}`)
       .join(", ");
 
     const createTableSql = `CREATE TABLE IF NOT EXISTS ${tableName} (${fields});`;
 
-    await this._client.query(createTableSql);
-  }
-
-  get client(): IDatabase<any> {
-    this.ensureConnection();
-
-    return this._client;
-  }
-
-  private ensureConnection(): void {
-    if (!this._client) {
-      throw new Error("Not connected to a database");
-    }
+    await this.client.query(createTableSql);
   }
 }
