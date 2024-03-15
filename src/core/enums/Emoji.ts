@@ -2,8 +2,7 @@ export enum Emoji {
   SUCCESS = "✅",
   WARNING = "⚠️",
   ERROR = "❌",
-  SPINNER = "⠋",
-  CHECK = "✔️",
+  CHECK = "✅",
   ARROW = "➡️",
   QUESTION = "❓",
   HOURGLASS = "⏳",
@@ -26,4 +25,6 @@ export enum Emoji {
   MOCHA = "☕",
   CASSANDRA = "🏺",
   CLEANUP = "🧹",
+  BIN = "🗑️",
+  FAIL_CONNECT = "🚫",
 }

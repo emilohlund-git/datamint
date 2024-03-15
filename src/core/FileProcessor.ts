@@ -82,12 +82,6 @@ export class FileProcessor extends Observer<FileProcessor> {
   async cleanupTempDir(tempDir: string) {
     if (!tempDir) return false;
     await rimraf(tempDir);
-    LoggerService.info(
-      ` Removed temp directory: ${tempDir}`,
-      LogColor.GREEN,
-      LogStyle.BRIGHT,
-      "🗑️"
-    );
   }
 
   async cleanupTempDirs() {
@@ -108,10 +102,8 @@ export class FileProcessor extends Observer<FileProcessor> {
   protected async gracefulShutdown(): Promise<void> {
     try {
       await this.cleanupTempDir(this.tempDir);
-      LoggerService.info(
+      LoggerService.success(
         `Successfully cleaned the ${this.database} temp files.`,
-        LogColor.GREEN,
-        LogStyle.DIM,
         Emoji.CLEANUP
       );
     } catch (error: any) {

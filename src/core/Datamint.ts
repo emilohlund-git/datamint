@@ -1,6 +1,6 @@
 import { DatabasePlugin } from "./plugins/DatabasePlugin";
 import { DatabaseOptions } from "./interfaces/DatabaseOptions";
-import { DatabaseType, Emoji, LogColor, LogStyle } from "./enums";
+import { DatabaseType, Emoji, LogColor } from "./enums";
 import { DatamintManager } from "./DatamintManager";
 import { DockerManager } from "./docker/DockerManager";
 import { LoggerService } from "./logging/LoggerService";
@@ -46,8 +46,6 @@ export class Datamint<T extends DatabasePlugin> extends Observer<
     if (index > -1) {
       LoggerService.info(
         `Gracefully terminating the ${this.database} Datamint...`,
-        LogColor.CYAN,
-        LogStyle.BRIGHT,
         Emoji[this.database.toUpperCase() as keyof typeof Emoji]
       );
 
@@ -55,6 +53,7 @@ export class Datamint<T extends DatabasePlugin> extends Observer<
     }
 
     if (DatamintManager.getInstances().length === 0) {
+      await this.fileProcessor.cleanupTempDirs();
       process.exit(0);
     }
   }

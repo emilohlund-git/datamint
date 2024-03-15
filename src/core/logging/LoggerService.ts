@@ -4,29 +4,49 @@ import { BackgroundColor } from "../enums/BackgroundColor";
 import { Emoji } from "../enums/Emoji";
 import { Spinners } from "../constants/Spinners";
 
+export enum Verbosity {
+  NONE,
+  ERROR,
+  WARNING,
+  INFO,
+  DEBUG,
+}
+
 export class LoggerService {
+  static verbosity: Verbosity = Verbosity.INFO;
+  static color?: LogColor;
+  static context?: string = "Datamint";
+  static emojis?: boolean = true;
+  static styles?: boolean = true;
+
   static info(
     message: string,
-    color: LogColor,
-    style: LogStyle,
-    emoji: string,
+    emoji: Emoji,
+    color: LogColor = LogColor.CYAN,
+    style: LogStyle = LogStyle.BRIGHT,
     background?: BackgroundColor
   ) {
-    const styles = `${style}${color}${background ?? ""}`;
-    const logMessage = `\r${styles}${emoji} ${message}${LogStyle.RESET}`;
-    console.log(logMessage);
+    this.log(message, emoji, color, style, Verbosity.INFO, background);
+  }
+
+  static success(
+    message: string,
+    emoji: Emoji = Emoji.SUCCESS,
+    color: LogColor = LogColor.GREEN,
+    style: LogStyle = LogStyle.BRIGHT,
+    background?: BackgroundColor
+  ) {
+    this.log(message, emoji, color, style, Verbosity.INFO, background);
   }
 
   static warning(
     message: string,
-    color: LogColor,
-    style: LogStyle,
     emoji: Emoji = Emoji.WARNING,
+    color: LogColor = LogColor.YELLOW,
+    style: LogStyle = LogStyle.BRIGHT,
     background?: BackgroundColor
   ) {
-    const styles = `${style}${color}${background ?? ""}`;
-    const logMessage = `\r${styles}${emoji}  ${message}${LogStyle.RESET}`;
-    console.log(logMessage);
+    this.log(message, emoji, color, style, Verbosity.WARNING, background);
   }
 
   static error(
@@ -35,9 +55,17 @@ export class LoggerService {
     emoji: Emoji = Emoji.ERROR,
     background?: BackgroundColor
   ) {
-    const styles = `${LogStyle.BRIGHT}${background ?? ""}${LogColor.RED}`;
-    const logMessage = `\n${styles}${emoji} ${message}${LogStyle.RESET}`;
-    console.log(logMessage, error ?? "");
+    this.log(
+      message,
+      emoji,
+      LogColor.RED,
+      LogStyle.BRIGHT,
+      Verbosity.ERROR,
+      background
+    );
+    if (error && this.verbosity >= Verbosity.ERROR) {
+      console.log(error);
+    }
   }
 
   static spinner(
@@ -45,7 +73,7 @@ export class LoggerService {
     style: LogStyle,
     color?: LogColor,
     spinners?: string[],
-    interval?: number,
+    interval?: number
   ) {
     const spinner = spinners ?? Spinners.CONNECTING;
     let spinnerIndex = 0;
@@ -61,5 +89,27 @@ export class LoggerService {
       clearInterval(spinnerInterval);
       process.stdout.write("\x1b[2K\x1b[0G");
     };
+  }
+
+  private static log(
+    message: string,
+    emoji: Emoji,
+    color: LogColor,
+    style: LogStyle,
+    verbosity: Verbosity,
+    background?: BackgroundColor
+  ) {
+    if (this.verbosity < verbosity) return;
+
+    const timestamp = new Date().toISOString();
+    const level = Verbosity[verbosity];
+
+    color = this.color || color;
+    message = this.emojis ? `${emoji} ${message}` : message;
+    message = this.context ? `[${this.context}] - ${message}` : message;
+    const styles = this.styles ? `${style}${color}${background ?? ""}` : "";
+
+    const logMessage = `\r${styles}[${timestamp}] - [${level}] - ${message}${LogStyle.RESET}`;
+    console.log(logMessage);
   }
 }

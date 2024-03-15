@@ -26,6 +26,4 @@ export abstract class Observer<T> {
       await observer.update();
     }
   }
-
-  protected abstract gracefulShutdown(database: DatabaseType): Promise<void>;
 }

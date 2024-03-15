@@ -108,10 +108,8 @@ export class DatamintClient<T extends DatabasePlugin> {
         await this._plugin.connect(connectionString);
 
         stopSpinner();
-        LoggerService.info(
-          ` Successfully connected to the ${this.database} database.`,
-          LogColor.GREEN,
-          LogStyle.BRIGHT,
+        LoggerService.success(
+          `Successfully connected to the ${this.database} database.`,
           Emoji.CHECK
         );
 
@@ -120,14 +118,15 @@ export class DatamintClient<T extends DatabasePlugin> {
         attempts++;
         LoggerService.warning(
           `Failed to connect to the database. Retrying... (${attempts}/${maxAttempts})`,
+          Emoji.FAIL_CONNECT,
           LogColor.YELLOW,
           LogStyle.DIM
         );
         LoggerService.warning(
-          `Reason: ${err.message}`,
+          `${err.message.split(": ")[1]}`,
+          Emoji.ELASTICSEARCH,
           LogColor.GRAY,
-          LogStyle.DIM,
-          Emoji.ELASTICSEARCH
+          LogStyle.DIM
         );
         await new Promise((resolve) => setTimeout(resolve, interval));
       }
