@@ -1,4 +1,4 @@
-import { MongoDBPlugin, MySQLPlugin, PostgreSQLPlugin } from "../plugins";
+import { MongoDBPlugin, MySQLPlugin, PostgreSQLPlugin } from "../core/plugins";
 import { Datamint } from "../core/Datamint";
 
 declare global {
