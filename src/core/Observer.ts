@@ -8,10 +8,7 @@ export abstract class Observer<T> {
     this.database = database;
   }
 
-  abstract update(info: {
-    database: DatabaseType;
-    tempDir: string;
-  }): Promise<void>;
+  abstract update(): Promise<void>;
 
   public addObserver(observer: Observer<T>) {
     this.observers.push(observer);
@@ -24,17 +21,11 @@ export abstract class Observer<T> {
     }
   }
 
-  protected async notifyObservers(info: {
-    database: DatabaseType;
-    tempDir: string;
-  }) {
+  protected async notifyObservers() {
     for (const observer of this.observers) {
-      await observer.update(info);
+      await observer.update();
     }
   }
 
-  protected abstract gracefulShutdown(info: {
-    database: DatabaseType;
-    tempDir: string;
-  }): Promise<void>;
+  protected abstract gracefulShutdown(database: DatabaseType): Promise<void>;
 }

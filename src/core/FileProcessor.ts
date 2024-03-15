@@ -15,14 +15,15 @@ const writeFile = promisify(fs.writeFile);
 const readdir = promisify(fs.readdir);
 
 export class FileProcessor extends Observer<FileProcessor> {
+  private tempDir: string;
   private tempDirs: string[] = [];
 
   getFilePath(...paths: string[]) {
     return path.join(__dirname, "..", ...paths);
   }
 
-  async update(info: { database: DatabaseType; tempDir: string }) {
-    await this.gracefulShutdown(info);
+  async update() {
+    await this.gracefulShutdown();
   }
 
   async createTempDir() {
@@ -30,6 +31,7 @@ export class FileProcessor extends Observer<FileProcessor> {
       path.join(__dirname, "..", "docker", "datamint-")
     );
 
+    this.tempDir = tempDir;
     this.tempDirs.push(tempDir);
     return tempDir;
   }
@@ -103,12 +105,9 @@ export class FileProcessor extends Observer<FileProcessor> {
     }
   }
 
-  protected async gracefulShutdown(info: {
-    database: DatabaseType;
-    tempDir: string;
-  }): Promise<void> {
+  protected async gracefulShutdown(): Promise<void> {
     try {
-      await this.cleanupTempDir(info.tempDir);
+      await this.cleanupTempDir(this.tempDir);
       LoggerService.info(
         `Successfully cleaned the ${this.database} temp files.`,
         LogColor.GREEN,

@@ -27,12 +27,9 @@ export class Datamint<T extends DatabasePlugin> extends Observer<
     this.dockerManager.addObserver(this);
   }
 
-  async update(info: { database: DatabaseType; tempDir: string }) {
-    await this.gracefulShutdown(info);
-    this.notifyObservers({
-      database: this.database,
-      tempDir: this.dockerManager.tempDir,
-    });
+  async update() {
+    await this.gracefulShutdown();
+    this.notifyObservers();
   }
 
   async start() {
@@ -44,17 +41,14 @@ export class Datamint<T extends DatabasePlugin> extends Observer<
     await this.dockerManager.stopContainer();
   }
 
-  protected async gracefulShutdown(info: {
-    database: DatabaseType;
-    tempDir: string;
-  }) {
+  protected async gracefulShutdown() {
     const index = DatamintManager.getInstanceIndex(this);
     if (index > -1) {
       LoggerService.info(
-        `Gracefully terminating the ${info.database} Datamint...`,
+        `Gracefully terminating the ${this.database} Datamint...`,
         LogColor.CYAN,
         LogStyle.BRIGHT,
-        Emoji[info.database.toUpperCase() as keyof typeof Emoji]
+        Emoji[this.database.toUpperCase() as keyof typeof Emoji]
       );
 
       DatamintManager.removeInstance(this);

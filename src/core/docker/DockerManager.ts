@@ -16,7 +16,7 @@ export class DockerManager<T extends DatabasePlugin> extends Observer<
   public tempDir: string;
   private options: DatabaseOptions;
   private dockerContainerPath: string;
-  public isContainerRunning: boolean = false;
+  public hasRunningContainer: boolean = false;
   private fileProcessor: FileProcessor;
   private client: DatamintClient<T>;
   private errorMessages: { [key: number]: string } = {
@@ -39,32 +39,17 @@ export class DockerManager<T extends DatabasePlugin> extends Observer<
     this.setEnvironmentVariables();
     this.client = new DatamintClient(database, options);
     this.fileProcessor = fileProcessor;
-
-    process.on("SIGINT", () =>
-      this.gracefulShutdown({
-        database: this.database,
-        tempDir: this.tempDir,
-      })
-    );
-    process.on("SIGTERM", () =>
-      this.gracefulShutdown({
-        database: this.database,
-        tempDir: this.tempDir,
-      })
-    );
-    process.on("uncaughtException", () =>
-      this.gracefulShutdown({
-        database: this.database,
-        tempDir: this.tempDir,
-      })
-    );
-
     this.addObserver(this.fileProcessor);
+
+    process.on("SIGINT", () => this.gracefulShutdown(this.database));
+    process.on("SIGTERM", () => this.gracefulShutdown(this.database));
+    process.on("uncaughtException", () => this.gracefulShutdown(this.database));
   }
 
-  async update(info: { database: DatabaseType; tempDir: string }) {}
+  async update() {}
 
   async startContainer() {
+    this.hasRunningContainer = true;
     this.tempDir = await this.fileProcessor.createTempDir();
 
     const composeFilePath = this.fileProcessor.getFilePath(
@@ -109,7 +94,6 @@ export class DockerManager<T extends DatabasePlugin> extends Observer<
     try {
       await this.service.pullImage(tempComposeFilePath, this.database);
       await this.service.startContainer(tempComposeFilePath, this.database);
-      this.isContainerRunning = true;
       await this.client.checkDatabaseConnection();
     } catch (error: any) {
       this.handleError(error, `Failed to start the ${this.database} container`);
@@ -117,7 +101,7 @@ export class DockerManager<T extends DatabasePlugin> extends Observer<
   }
 
   async stopContainer() {
-    if (!this.isContainerRunning) {
+    if (!this.hasRunningContainer) {
       return null;
     }
 
@@ -129,20 +113,17 @@ export class DockerManager<T extends DatabasePlugin> extends Observer<
     );
 
     try {
-      await this.fileProcessor.cleanupTempDir(this.tempDir);
       await this.service.stopContainer(this.dockerContainerPath);
-      this.isContainerRunning = false;
+      this.hasRunningContainer = false;
       LoggerService.info(
         ` Successfully stopped the ${this.database} container.`,
         LogColor.GREEN,
         LogStyle.DIM,
         Emoji.CHECK
       );
+      this.notifyObservers();
     } catch (error: any) {
-      await this.gracefulShutdown({
-        database: this.database,
-        tempDir: this.tempDir,
-      });
+      await this.gracefulShutdown(this.database);
     }
 
     return null;
@@ -156,19 +137,13 @@ export class DockerManager<T extends DatabasePlugin> extends Observer<
 
   private async handleError(error: any, errorMessage: string) {
     const additionalMessage = this.errorMessages[error.code] || "";
-    console.log(error.code, error.message);
     const formattedMessage = this.formatErrorMessage(
       errorMessage,
       additionalMessage
     );
     LoggerService.error(formattedMessage);
 
-    if (this.isContainerRunning) {
-      await this.gracefulShutdown({
-        database: this.database,
-        tempDir: this.tempDir,
-      });
-    }
+    await this.stopContainer();
 
     throw error;
   }
@@ -180,26 +155,19 @@ export class DockerManager<T extends DatabasePlugin> extends Observer<
     return `${baseMessage}: \n${LogStyle.RESET}${LogColor.WHITE}${additionalMessage}${LogStyle.RESET}`;
   }
 
-  protected async gracefulShutdown(info: {
-    database: DatabaseType;
-    tempDir: string;
-  }): Promise<void> {
+  protected async gracefulShutdown(database: DatabaseType): Promise<void> {
     try {
-      if (this.isContainerRunning) {
+      if (this.hasRunningContainer) {
         LoggerService.info(
-          `Gracefully shutting down the ${info.database} container...`,
+          `Gracefully shutting down the ${this.database} container...`,
           LogColor.YELLOW,
           LogStyle.BRIGHT,
-          Emoji[info.database.toUpperCase() as keyof typeof Emoji]
+          Emoji[this.database.toUpperCase() as keyof typeof Emoji]
         );
 
         await this.stopContainer();
+        this.hasRunningContainer = false;
       }
-
-      this.notifyObservers({
-        database: info.database,
-        tempDir: this.tempDir,
-      });
     } catch (error: any) {
       LoggerService.error(" Failed to clean up the Docker container.", error);
     }
