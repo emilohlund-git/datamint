@@ -1,0 +1,42 @@
+# Configuring Datamint
+
+There are a few configuration options within Datamint, lets start with how to configure the `LoggerService`.
+
+## LoggerService
+
+The `LoggerService` is a static class that is used to log messages to the console. It is used throughout the Datamint library to log messages, warnings, and errors. The `LoggerService` has a few configuration options that can be set.
+
+| Property | Type | Description | Options |
+| -------- | ---- | ----------- | ------- |
+| `verbosity` | `Verbosity` | Sets the log level | `INFO`, `WARN`, `ERROR`, `DEBUG`, `NONE` |
+| `color` | `LogColor` | Sets the color of the log messages | `BLACK`, `RED`, `GREEN`, `YELLOW`, `BLUE`, `MAGENTA`, `CYAN`, `WHITE`, `GRAY` |
+| `context` | `string` | Sets the context of the log messages | Any string |
+| `emojis` | `boolean` | Sets whether or not to use emojis in the log messages | `true`, `false` |
+| `styles` | `boolean` | Sets whether or not to use styles in the log messages | `true`, `false` |
+
+## DatamintClient
+
+The `DatamintClient` is the main entry point for interacting with databases in Datamint. It provides methods for connecting to a database, executing queries, and managing the database connection.
+
+| Property | Type | Description | Options |
+| -------- | ---- | ----------- | ------- |
+| `database` | `DatabaseType` | Specifies the type of database to connect to | `MONGODB`, `MYSQL`, `POSTGRESQL` |
+| `options` | `DatabaseOptions` | Specifies the database connection details | Object with `name`, `user`, `password` properties |
+
+### DatabaseOptions
+
+The `DatabaseOptions` interface specifies the connection details for a database.
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `name` | `string` | The name of the database |
+| `user` | `string` | The username to use for authentication |
+| `password` | `string` | The password to use for authentication |
+
+### Connection String
+
+If you do not provide a `DatabaseOptions` object when creating a `DatamintClient`, you must provide a connection string when calling the `connect` method. The connection string should be in a format appropriate for the type of database you are connecting to.
+
+| Method | Parameters | Description |
+| ------ | ---------- | ----------- |
+| `connect` | `connectionString?: string` | Connects to the database using the provided connection string or the `DatabaseOptions` provided during the creation of the `DatamintClient` instance |
