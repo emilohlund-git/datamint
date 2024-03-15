@@ -1,8 +1,8 @@
-import { LogStyle } from "../utils/enums/LogStyle";
-import { LogColor } from "../utils/enums/LogColor";
-import { BackgroundColor } from "../utils/enums/BackgroundColor";
-import { Emoji } from "../utils/enums/Emoji";
-import { Spinners } from "../utils/constants/Spinners";
+import { LogStyle } from "../enums/LogStyle";
+import { LogColor } from "../enums/LogColor";
+import { BackgroundColor } from "../enums/BackgroundColor";
+import { Emoji } from "../enums/Emoji";
+import { Spinners } from "../constants/Spinners";
 
 export class LoggerService {
   static info(

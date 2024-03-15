@@ -17,25 +17,25 @@
   <span>These document pages are under construction!</span>
 </div>
 
-Welcome to Datamint!
+## Welcome to Datamint!
 
-Datamint is a utility library designed to simplify the process of setting up and tearing down Dockerized databases for testing purposes. It is a powerful tool for developers who frequently work with databases in their testing environments.
+`Datamint` is a utility library designed to simplify the process of setting up and tearing down Dockerized databases for testing purposes. It is a powerful tool for developers who frequently work with databases in their testing environments.
 
 ## What is Datamint?
 
-Datamint is a library that provides an easy way to set up and tear down Dockerized databases. It currently supports MongoDB, MySQL, and PostgreSQL. The library is designed to work with minimal configuration, making it a convenient tool for developers.
+`Datamint` provides an easy way to set up and tear down Dockerized databases, it provides built-in clients to match the Dockerized database for seamless configuration. `Datamint` currently supports `MongoDB`, `MySQL`, and `PostgreSQL`. The library is designed to work with minimal configuration, making it a convenient tool for developers.
 
 ## Features
 
-- Easy setup and teardown: Datamint simplifies the process of setting up and tearing down Dockerized databases, making it easier to manage your testing environment.
-- Supports multiple databases: Datamint currently supports MongoDB, MySQL, and PostgreSQL, providing flexibility for your testing needs.
-- Minimal configuration required: Datamint is designed to work with minimal configuration, making it a convenient tool for developers.
+- Easy setup and teardown: `Datamint` simplifies the process of setting up and tearing down Dockerized databases, making it easier to manage your testing environment.
+- Supports multiple databases: `Datamint` currently supports MongoDB, MySQL, and PostgreSQL, providing flexibility for your testing needs.
+- Minimal configuration required: `Datamint` is designed to work with minimal configuration, making it a convenient tool for developers.
 
 ## How does it work?
 
-The Datamint library uses a Datamint class alongside a DatabasePlugin to spin up and tear down Docker containers before and after test lifecycles. The Docker containers are defined based on the options you pass in to the Datamint class.
+The Datamint library uses a `Datamint` class to spin up and tear down Docker containers before and after test lifecycles, alongside a `DatamintClient` to handle test-suite database operations. The Docker containers are defined based on the options you pass in to the `Datamint` class.
 
-For example, the following code will spin up a Docker container with the latest PostgreSQL image, creating a "test" database, and a user with the specified credentials. It will then generate a connection string based on these arguments and connect to the dockerized database.
+For example, the following code will spin up a Docker container with the latest PostgreSQL image, creating a `test` database, and a user with the specified credentials. It will then generate a connection string based on these arguments and connect to the dockerized database.
 
 ```ts filename="demo.ts" copy
 const config = {
@@ -44,16 +44,12 @@ const config = {
   password: "password",
 };
 
-const mint = new Datamint(
-  new PostgreSQLPlugin(),
-  DatabaseType.POSTGRESQL,
-  dbConfig
-);
+const mint = new Datamint(DatabaseType.POSTGRESQL, config);
 
-mint.startDockerContainer();
+await mint.start();
 ```
 
-## Next Steps 
+## Next Steps
 
 To figure out how to install `Datamint`, visit the [Installation](installation.mdx) page. Alternatively, go ahead and check out the [Usage Examples](usage-examples.mdx) page to see how
 to use `Datamint` in your test suites!

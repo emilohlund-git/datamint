@@ -30,19 +30,13 @@ const config = {
 };
 
 module.exports = async () => {
-  const mint = new Datamint(
-    new PostgreSQLPlugin(),
-    DatabaseType.POSTGRESQL,
-    config
-  );
-
-  await mint.startDockerContainer();
-
+  const mint = new Datamint(DatabaseType.POSTGRESQL, config);
+  await mint.start();
   global.__MINT__ = mint;
 };
 ```
 
-Here we are making sure that we are awaiting the process of spinning up the Docker container. The `startDockerContainer`
+Here we are making sure that we are awaiting the process of spinning up the Docker container. The `start`
 method will also make sure that the Dockerized database is actually running and accepts connections. We are saving the `mint`
 object to a global variable, just to make sure we can access the same instance on teardown, but this can be done in multiple ways.
 
@@ -51,11 +45,11 @@ const { DatabaseType } = require("datamint");
 
 module.exports = async () => {
   const mint = global.__MINT__;
-  await mint.stopDockerContainer();
+  await mint.stop();
 };
 ```
 
-The `stopDockerContainer` method will do two things:
+The `stop` method will do two things:
 
 1. Take down the Docker container.
 2. Remove any temporary files & directories used by the application.
@@ -64,89 +58,48 @@ Should any of these processes fail and cause an error, there are failsafe mechan
 
 ## Using the Dockerized Database in Jest Tests
 
-So now all the prerequisites are in place, and we can use Datamint in our test suites. This is how we can achieve that:
+So now all the prerequisites are in place, and we can use the `DatamintClient` in our test suites. This is how we can achieve that:
 
 ```ts filename="pg.test.ts" copy
 describe("Datamint Test", () => {
-  let datamint: Datamint<PostgreSQLPlugin>;
+  let datamint: DatamintClient<PostgreSQLPlugin>;
   const tableName = "your_table_name";
 
   beforeAll(async () => {
-    datamint = new Datamint(new PostgreSQLPlugin(), DatabaseType.POSTGRESQL, {
+    datamint = new DatamintClient(DatabaseType.POSTGRESQL, {
       name: "test",
       password: "test",
       user: "test",
     });
 
-    await datamint.connectPlugin();
+    await datamint.connect();
 
-    await datamint.plugin.client.none(
-      `CREATE TABLE IF NOT EXISTS ${tableName} (id INT, name VARCHAR(255))`
-    );
+    await datamint.createTable(tableName, {
+      id: "SERIAL PRIMARY KEY",
+      name: "VARCHAR(255)",
+    });
   });
 
   afterAll(async () => {
-    await datamint.resetPlugin();
-    await datamint.disconnectPlugin();
+    await datamint.reset();
+    await datamint.disconnect();
   });
 
   it("should insert data into the specified table correctly", async () => {
     const mockData = [{ id: 1, name: "John" }];
-    await datamint.plugin.insert(tableName, mockData);
+    await datamint.insert(tableName, mockData);
 
-    const result = await datamint.plugin.client.any(
-      `SELECT * FROM ${tableName} WHERE id = 1`
-    );
-    expect(result).toEqual(
-      expect.arrayContaining([expect.objectContaining({ id: 1, name: "John" })])
-    );
+    const result = await datamint.find(tableName, { id: 1 });
+
+    expect(result[0]).toEqual({ id: 1, name: "John" });
   });
 });
 ```
 
+Here we are using the test-suite faced object `DatamintClient`, which is capable of CRUD database operations. As well as connecting and disconnecting the client from the database.
 We do not need to set up any Docker container logic at this point, we handled all of this in the global setup and teardown scripts.
 You can choose to do so in the `beforeAll` and `afterAll` methods if you wish. But considering it takes a little while to spin up Docker containers,
 I would recommend an approach where you handle this logic before and after the test suite lifecycle.
-
-Another way to do it is by just instantiating a `DatabasePlugin` of choice, and connect the plugin that way instead.
-That approach would look like this:
-
-```ts filename="pg.test.ts" copy
-describe("Datamint Test", () => {
-  let plugin: PostgreSQLPlugin;
-  const connectionString = "postgresql://{user}:{password}@localhost:5432/{db}";
-  const tableName = "your_table_name";
-
-  beforeAll(async () => {
-    plugin = new PostgreSQLPlugin();
-
-    await plugin.connectPlugin(connectionString);
-
-    await plugin.client.none(
-      `CREATE TABLE IF NOT EXISTS ${tableName} (id INT, name VARCHAR(255))`
-    );
-  });
-
-  afterAll(async () => {
-    await plugin.reset();
-    await plugin.disconnect();
-  });
-
-  it("should insert data into the specified table correctly", async () => {
-    const mockData = [{ id: 1, name: "John" }];
-    await plugin.insert(tableName, mockData);
-
-    const result = await plugin.client.any(
-      `SELECT * FROM ${tableName} WHERE id = 1`
-    );
-    expect(result).toEqual(
-      expect.arrayContaining([expect.objectContaining({ id: 1, name: "John" })])
-    );
-  });
-});
-```
-
-We lose the benefit of having a dynamic connection string created for us, which we in the case of using the `Datamint` object, we don't have to specify.
 
 ## Conclusion
 

@@ -1,35 +1,20 @@
-const { Datamint } = require("../src/utils/Datamint");
-const { PostgreSQLPlugin } = require("../src/plugins/PostgreSQLPlugin");
-const { DatabaseType } = require("../src/utils/enums/DatabaseType");
-const { MySQLPlugin } = require("../src/plugins/MySQLPlugin");
-const { MongoDBPlugin } = require("../src/plugins/MongoDBPlugin");
+const { Datamint } = require("../src/core/Datamint");
+const { DatabaseType } = require("../src/core/enums/DatabaseType");
 
 module.exports = async () => {
-  const mysqlPlugin = new MySQLPlugin();
-  const postgreSQLPlugin = new PostgreSQLPlugin();
-  const mongodbPlugin = new MongoDBPlugin();
-
   const dbConfig = {
     name: "test",
     user: "test",
     password: "test",
   };
 
-  const postgresDatamint = new Datamint(
-    postgreSQLPlugin,
-    DatabaseType.POSTGRESQL,
-    dbConfig
-  );
-  const mysqlDatamint = new Datamint(mysqlPlugin, DatabaseType.MYSQL, dbConfig);
-  const mongodbDatamint = new Datamint(
-    mongodbPlugin,
-    DatabaseType.MONGODB,
-    dbConfig
-  );
+  const postgresDatamint = new Datamint(DatabaseType.POSTGRESQL, dbConfig);
+  const mysqlDatamint = new Datamint(DatabaseType.MYSQL, dbConfig);
+  const mongodbDatamint = new Datamint(DatabaseType.MONGODB, dbConfig);
 
-  await postgresDatamint.startDockerContainer();
-  await mysqlDatamint.startDockerContainer();
-  await mongodbDatamint.startDockerContainer();
+  await postgresDatamint.start();
+  await mysqlDatamint.start();
+  await mongodbDatamint.start();
 
   global.__POSTGRESQL_DATAMINT__ = postgresDatamint;
   global.__MYSQL_DATAMINT__ = mysqlDatamint;

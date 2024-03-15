@@ -1,5 +1,5 @@
 import { MongoDBPlugin, MySQLPlugin, PostgreSQLPlugin } from "../plugins";
-import { Datamint } from "../utils/Datamint";
+import { Datamint } from "../core/Datamint";
 
 declare global {
   namespace globalThis {

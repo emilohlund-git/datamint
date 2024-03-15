@@ -1,4 +1,4 @@
-import { DatabasePlugin } from "src/plugins";
+import { DatabasePlugin } from "./plugins";
 import { Datamint } from "./Datamint";
 
 export class DatamintManager {

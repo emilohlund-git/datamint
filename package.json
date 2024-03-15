@@ -21,7 +21,7 @@
     "build": "tsc && npm run copy",
     "prepare": "npm run build",
     "copy": "copyfiles -u 1 src/docker/* dist",
-    "test": "jest",
+    "test": "jest --detectOpenHandles",
     "coverage": "jest --coverage && cat ./coverage/lcov.info | coveralls"
   },
   "keywords": [
