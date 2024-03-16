@@ -13,9 +13,7 @@ export enum Verbosity {
 }
 
 export class LoggerService {
-  static verbosity: Verbosity = process.env.LOGGING_DISABLED
-    ? Verbosity.NONE
-    : Verbosity.INFO;
+  static verbosity: Verbosity = Verbosity.NONE;
   static color?: LogColor;
   static context?: string = "Datamint";
   static emojis?: boolean = true;
