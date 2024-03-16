@@ -7,7 +7,10 @@
     "type": "separator"
   },
   "usage-examples": "Usage Examples",
-  "features": "Features",
+  "modules": "Modules",
+  "---2": {
+    "type": "separator"
+  },
   "about": {
     "title": "About",
     "type": "page"

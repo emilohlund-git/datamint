@@ -1,0 +1,94 @@
+# DatamintClient Class
+
+The `DatamintClient` class is a part of the Datamint library. It provides an interface to interact with different types of databases.
+
+## Properties
+
+- `_plugin`: An instance of a `DatabasePlugin` subclass. It's responsible for performing database operations.
+- `options`: An optional `DatabaseOptions` object containing options for the database.
+- `database`: A `DatabaseType` enum value represeting the type of database.
+
+## Constructor
+
+The constructor for the `DatamintClient` class takes two parameters:
+
+- `database`: A `DatabaseType` enum value representing the type of database.
+- `options`: An optional `DatabaseOptions` object containing options for the database.
+
+Example:
+
+```typescript
+const client = new DatamintClient(DatabaseType.MYSQL, {
+  /* options */
+});
+```
+
+## Methods
+
+`connect(connectionString?: string)`
+
+This asynchronous method connects to the database. If a connection string is not provided, it will generate one based on the `options` property.
+
+`disconnect()`
+
+This asynchronous method disconnects from the database.
+
+`reset()`
+
+This asynchronous method resets the database. It will delete all data and reset the schema.
+
+`find(collection: string, query: FindQuery)`
+
+This asynchronous method finds documents in a collection / table that match the provided query.
+
+`delete(collection: string, query: DeleteQuery)`
+
+This asynchronous method deletes documents in a collection / table that match the provided query.
+
+`update(collection: string, query: UpdateQuery)`
+
+This asynchronous method updates documents in a collection / table that match the provided query.
+
+`insert(collection: string, query: InsertQuery)`
+
+This asynchronous method inserts documents into a collection / table.
+
+`count(collection: string, query: CountQuery)`
+
+This asynchronous method counts the number of documents in a collection / table that match the provided query.
+
+`listTables()`
+
+This asynchronous method lists all collections / tables in the database.
+
+`createTable(collection: string, schema?: Schema)`
+
+This asynchronous method creates a new table in the database with the provided name and schema.
+
+`checkDatabaseConnection(maxAttempts = 20, interval = 3000)`
+
+This asynchronous method checks the database connection. It will attempt to connect to the database `maxAttempts` times, with an interval of `interval` milliseconds between each attempt.
+
+## Example
+
+Here's an example of how to use the `DatamintClient` class:
+
+```typescript
+const client = new DatamintClient(DatabaseType.MYSQL, {
+  /* options */
+});
+
+// Connect to the database
+await client.connect("mysql://user:password@localhost:3306/database");
+
+// Insert a document into a collection
+await client.insert("users", { name: "John Doe", email: "john@example.com" });
+
+// Find a document in a collection
+const users = await client.find("users", { name: "John Doe" });
+
+// Disconnect from the database
+await client.disconnect();
+```
+
+Remember to replace `{/* options */}` with actual options for the database.

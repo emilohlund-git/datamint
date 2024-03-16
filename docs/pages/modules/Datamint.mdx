@@ -1,0 +1,61 @@
+# Datamint Class
+
+The `Datamint` class is a part of the Datamint library. It extends the `Observer` class and is responsible for managing a Docker container for a specific database.
+
+## Properties
+
+- `dockerManager`: An instance of the `DockerManager` class. It's responsible for managing the Docker container.
+- `fileProcessor`: An instance of the `FileProcessor` class. It's responsible for processing the files related to the Docker container.
+
+## Constructor
+
+The constructor for the `Datamint` class takes two parameters:
+
+- `database`: A `DatabaseType` enum. It specifies the type of database that the `Datamint` class will manage.
+- `options`: A `DatabaseOptions` object that contains the options for the database.
+
+Example:
+
+```typescript
+const datamint = new Datamint(DatabaseType.MYSQL, {
+  /* options */
+});
+```
+
+## Methods
+
+`update()`
+
+This asynchronous method gets called when the `Datamint` class is notified of a change. When called it will await the `dockerManager` to stop the container, the `fileProcessor` to process the files, and then gracefully exit the process.
+
+`start()`
+
+This asynchronous method starts the Docker container.
+
+`stop()`
+
+This asynchronous method stops the Docker container.
+
+`gracefulShutdown()`
+
+This protected asynchronous method gracefully shuts down the Docker container if the `Datamint` instance is no longer needed. It removes the instance from the `DatamintManager`, cleans up temporary directories if there are no more `Datamint` instances, and stops the Docker container.
+
+## Example
+
+Here's an example of how to use the `Datamint` class:
+
+```typescript
+const datamint = new Datamint(DatabaseType.MYSQL, {
+  /* options */
+});
+
+// Start the Docker container
+await datamint.start();
+
+// Do something with the database
+
+// Stop the Docker container
+await datamint.stop();
+```
+
+Remember to replace `{ /* options */ }` with the appropriate options for the database you want to manage.
