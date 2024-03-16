@@ -86,6 +86,7 @@ export class DockerManager<T extends DatabasePlugin> extends Observer<
     await this.handleContainerOperation(async () => {
       await this.service.stopContainer(this.dockerContainerPath);
       await this.fileProcessor.cleanupTempDir(this.tempDir);
+      this.errorHandler.cleanupEventListeners();
       LoggerService.info(
         `The ${this.database} container has been stopped and temporary files has been cleaned up.`,
         Emoji[this.database.toUpperCase() as keyof typeof Emoji]

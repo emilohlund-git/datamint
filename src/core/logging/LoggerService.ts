@@ -13,7 +13,7 @@ export enum Verbosity {
 }
 
 export class LoggerService {
-  static verbosity: Verbosity = Verbosity.NONE;
+  static verbosity: Verbosity = Verbosity.INFO;
   static color?: LogColor;
   static context?: string = "Datamint";
   static emojis?: boolean = true;

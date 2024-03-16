@@ -24,7 +24,7 @@ export class DockerErrorHandler<T extends DatabasePlugin> {
     process.on("uncaughtException", this.gracefulShutdown);
   }
 
-  private cleanupEventListeners() {
+  public cleanupEventListeners() {
     process.off("SIGINT", this.gracefulShutdown);
     process.off("SIGTERM", this.gracefulShutdown);
     process.off("uncaughtException", this.gracefulShutdown);

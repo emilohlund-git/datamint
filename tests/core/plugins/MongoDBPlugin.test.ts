@@ -2,7 +2,6 @@ import { MongoDBPlugin } from "@datamint/core/plugins/MongoDBPlugin";
 import { withDatamint } from "@datamint/core/hoc/withDatamint";
 import { DatabaseType } from "@datamint/core/enums";
 import { DatamintClient } from "@datamint/core/database";
-import * as heapdump from "heapdump";
 
 const mockConfig = {
   name: "mongo-db",
@@ -71,10 +70,6 @@ describe("MongoDBPlugin", () => {
   );
 
   beforeAll(setup);
-  afterAll(async () => {
-    await teardown();
-
-    heapdump.writeSnapshot("./" + Date.now() + ".heapsnapshot");
-  });
+  afterAll(teardown);
   run();
 });

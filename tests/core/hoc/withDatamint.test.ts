@@ -2,7 +2,6 @@ import { DatamintClient } from "@datamint/core/database";
 import { DatabaseType } from "@datamint/core/enums";
 import { withDatamint } from "@datamint/core/hoc/withDatamint";
 import { MySQLPlugin } from "@datamint/core/plugins";
-import * as heapdump from 'heapdump'; 
 
 describe("withDatamint", function () {
   const { setup, teardown, run } = withDatamint(
@@ -20,8 +19,6 @@ describe("withDatamint", function () {
         await client.insert("test", testData);
         const result = await client.find("test", { id: 1 });
         expect(result).toEqual([{ id: 1, name: "John" }]);
-
-        heapdump.writeSnapshot("./" + Date.now() + ".heapsnapshot");
       });
     }
   );
