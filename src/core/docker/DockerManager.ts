@@ -143,9 +143,7 @@ export class DockerManager<T extends DatabasePlugin> extends Observer<
   }
 
   private getContainerName(composeFilePath: string) {
-    const baseName = composeFilePath
-      .split("\\")
-      [composeFilePath.split("\\").length - 2].toLowerCase();
+    const baseName = path.basename(path.dirname(composeFilePath)).toLowerCase();
 
     const extensionMap: Record<DatabaseType, string> = {
       [DatabaseType.POSTGRESQL]: POSTGRESQL_DOCKER_EXTENSION,
