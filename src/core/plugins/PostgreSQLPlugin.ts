@@ -1,5 +1,11 @@
 import pgPromise, { IDatabase } from "pg-promise";
-import { DeleteQuery, FindQuery, InsertQuery, UpdateQuery } from "./types";
+import {
+  CountQuery,
+  DeleteQuery,
+  FindQuery,
+  InsertQuery,
+  UpdateQuery,
+} from "./types";
 import { BasePlugin } from "../plugins/BasePlugin";
 
 export class PostgreSQLPlugin extends BasePlugin<IDatabase<any>> {
@@ -62,7 +68,7 @@ export class PostgreSQLPlugin extends BasePlugin<IDatabase<any>> {
   protected escapeValue(value: any): string {
     return this._pgp.as.value(value);
   }
- 
+
   async insert(tableName: string, data: InsertQuery): Promise<void> {
     for (const row of data) {
       const fields = Object.keys(row).join(", ");
@@ -73,6 +79,13 @@ export class PostgreSQLPlugin extends BasePlugin<IDatabase<any>> {
       const query = `INSERT INTO ${tableName} (${fields}) VALUES (${placeholders});`;
       await this.client.none(query, values); // Pass values as the second parameter for parameterized query
     }
+  }
+
+  async count(tableName: string, query: CountQuery): Promise<number> {
+    const whereClause = this.objectToSql(query);
+    const sql = `SELECT COUNT(*) FROM ${tableName} WHERE ${whereClause}`;
+    const [{ count }] = await this.client?.query(sql);
+    return +count;
   }
 
   async createTable(
@@ -86,5 +99,12 @@ export class PostgreSQLPlugin extends BasePlugin<IDatabase<any>> {
     const createTableSql = `CREATE TABLE IF NOT EXISTS ${tableName} (${fields});`;
 
     await this.client.query(createTableSql);
+  }
+
+  async listTables(): Promise<{ name: string }[]> {
+    const query = `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';`;
+    const tables = await this.client.manyOrNone(query);
+
+    return tables.map((table) => table.table_name);
   }
 }

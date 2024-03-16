@@ -2,29 +2,36 @@ import { LoggerService } from "../logging";
 import { DatabaseType, Emoji, LogColor, LogStyle } from "../enums";
 import { DockerManager } from "../docker/DockerManager";
 import { DatabasePlugin } from "../plugins";
+import { ERROR_MESSAGES } from "../docker/constants";
+import { DockerException } from "../docker/exceptions";
+import { ensureDockerException } from "../utils";
 
 export class DockerErrorHandler<T extends DatabasePlugin> {
   private dockerManager: DockerManager<T>;
   private database: DatabaseType;
-  private errorMessages: { [key: number]: string } = {
-    0: `Container stopped - no tasks left to perform.`,
-    1: `Docker daemon not running or container already exists.`,
-    137: `Container terminated - manual stop or out of memory.`,
-    139: `Container error - possible bug in the application.`,
-    143: `Container stopped - it received a termination signal.`,
-  };
 
   constructor(dockerManager: DockerManager<T>, database: DatabaseType) {
     this.dockerManager = dockerManager;
     this.database = database;
 
-    process.on("SIGINT", () => this.gracefulShutdown());
-    process.on("SIGTERM", () => this.gracefulShutdown());
-    process.on("uncaughtException", () => this.gracefulShutdown());
+    this.gracefulShutdown = this.gracefulShutdown.bind(this);
+    this.setupEventListeners();
   }
 
-  async handleError(error: any, errorMessage: string) {
-    const additionalMessage = this.errorMessages[error.code] || "";
+  private setupEventListeners() {
+    process.on("SIGINT", this.gracefulShutdown);
+    process.on("SIGTERM", this.gracefulShutdown);
+    process.on("uncaughtException", this.gracefulShutdown);
+  }
+
+  private cleanupEventListeners() {
+    process.off("SIGINT", this.gracefulShutdown);
+    process.off("SIGTERM", this.gracefulShutdown);
+    process.off("uncaughtException", this.gracefulShutdown);
+  }
+
+  async handleError(error: DockerException, errorMessage: string) {
+    const additionalMessage = ERROR_MESSAGES[error.code] || "";
     const formattedMessage = this.formatErrorMessage(
       errorMessage,
       additionalMessage
@@ -54,8 +61,11 @@ export class DockerErrorHandler<T extends DatabasePlugin> {
         await this.dockerManager.stopContainer();
         this.dockerManager.hasRunningContainer = false;
       }
-    } catch (error: any) {
+    } catch (err: unknown) {
+      const error = ensureDockerException(err);
       LoggerService.error("Failed to clean up the Docker container.", error);
+    } finally {
+      this.cleanupEventListeners();
     }
   }
 }

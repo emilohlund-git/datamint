@@ -2,7 +2,6 @@ version: '3.1'
 services:
   mongodb-datamint:
     image: mongo:latest
-    container_name: mongodb_container
     ports:
       - 27017:27017
     environment:

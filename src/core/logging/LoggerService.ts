@@ -44,8 +44,20 @@ export class LoggerService {
     emoji: Emoji = Emoji.WARNING,
     color: LogColor = LogColor.YELLOW,
     style: LogStyle = LogStyle.BRIGHT,
-    background?: BackgroundColor
+    background?: BackgroundColor,
+    overwrite?: boolean
   ) {
+    if (overwrite) {
+      this.logOverwrite(
+        message,
+        emoji,
+        color,
+        style,
+        Verbosity.WARNING,
+        background
+      );
+      return;
+    }
     this.log(message, emoji, color, style, Verbosity.WARNING, background);
   }
 
@@ -111,5 +123,27 @@ export class LoggerService {
 
     const logMessage = `\r${styles}[${timestamp}] - [${level}] - ${message}${LogStyle.RESET}`;
     console.log(logMessage);
+  }
+
+  private static logOverwrite(
+    message: string,
+    emoji: Emoji,
+    color: LogColor,
+    style: LogStyle,
+    verbosity: Verbosity,
+    background?: BackgroundColor
+  ) {
+    if (this.verbosity < verbosity) return;
+
+    const timestamp = new Date().toISOString();
+    const level = Verbosity[verbosity];
+
+    color = this.color || color;
+    message = this.emojis ? `${emoji} ${message}` : message;
+    message = this.context ? `[${this.context}] - ${message}` : message;
+    const styles = this.styles ? `${style}${color}${background ?? ""}` : "";
+
+    const logMessage = `\r${styles}[${timestamp}] - [${level}] - ${message}${LogStyle.RESET}`;
+    process.stdout.write(logMessage);
   }
 }

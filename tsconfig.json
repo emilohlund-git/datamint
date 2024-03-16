@@ -15,7 +15,7 @@
     "moduleResolution": "Node",
     "noLib": false,
     "baseUrl": ".",
-    "types": ["node"]
+    "types": ["node", "jest"]
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts"],
   "exclude": ["node_modules", "**/*.spec.ts", "dist", "coverage"]

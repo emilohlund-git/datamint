@@ -5,8 +5,8 @@ import { compilerOptions } from "./tests/tsconfig.json";
 const config: Config = {
   testEnvironment: "node",
   testTimeout: 50000,
-  globalSetup: "./tests/global.setup.js",
-  globalTeardown: "./tests/global.teardown.js",
+  //globalSetup: "./tests/global.setup.js",
+  //globalTeardown: "./tests/global.teardown.js",
   modulePaths: ["<rootDir>"],
   moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, {
     prefix: "<rootDir>/",

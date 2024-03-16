@@ -9,7 +9,7 @@ export class DatamintManager {
   }
 
   static removeInstance<T extends DatabasePlugin>(instance: Datamint<T>) {
-    const index = this.instances.indexOf(instance);
+    const index = this.instances.findIndex((inst) => inst === instance);
     if (index > -1) {
       this.instances.splice(index, 1);
     }

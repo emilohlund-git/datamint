@@ -70,4 +70,12 @@ export class MongoDBPlugin extends BasePlugin<MongoClient> {
       validator: { $jsonSchema: schema ?? {} },
     });
   }
+
+  async listTables(): Promise<{ name: string }[]> {
+    const collections = await this.client.db().listCollections().toArray();
+
+    return collections.map((collection) => {
+      return { name: collection.name };
+    });
+  }
 }

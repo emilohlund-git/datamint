@@ -1,4 +1,4 @@
-const { Datamint } = require("../src/core/Datamint");
+/* const { Datamint } = require("../src/core/Datamint");
 const { DatabaseType } = require("../src/core/enums/DatabaseType");
 
 module.exports = async () => {
@@ -20,3 +20,4 @@ module.exports = async () => {
   global.__MYSQL_DATAMINT__ = mysqlDatamint;
   global.__MONGODB_DATAMINT__ = mongodbDatamint;
 };
+ */

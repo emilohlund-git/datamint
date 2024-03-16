@@ -1,4 +1,9 @@
-import { COMPOSE_FILE, DOCKER_DIR, INIT_MONGO_FILE } from "../constants";
+import {
+  COMPOSE_FILE,
+  DOCKER_DIR,
+  INIT_MONGO_FILE,
+  Spinners,
+} from "../constants";
 import { DockerService } from "./DockerService";
 import { DatabaseType, Emoji, LogColor, LogStyle } from "../enums";
 import { DatabaseOptions } from "../interfaces";
@@ -9,6 +14,12 @@ import { DatamintClient } from "../database/DatamintClient";
 import { FileProcessor } from "../FileProcessor";
 import { Observer } from "../Observer";
 import { DockerErrorHandler } from "./DockerErrorHandler";
+import { ensureDockerException } from "../utils";
+import {
+  MONGODB_DOCKER_EXTENSION,
+  MYSQL_DOCKER_EXTENSION,
+  POSTGRESQL_DOCKER_EXTENSION,
+} from "../docker/constants";
 
 export class DockerManager<T extends DatabasePlugin> extends Observer<
   DockerManager<T>
@@ -18,6 +29,7 @@ export class DockerManager<T extends DatabasePlugin> extends Observer<
   private options: DatabaseOptions;
   private dockerContainerPath: string;
   public hasRunningContainer: boolean = false;
+  private containerName: string;
   private fileProcessor: FileProcessor;
   private client: DatamintClient<T>;
   private errorHandler: DockerErrorHandler<T>;
@@ -62,7 +74,7 @@ export class DockerManager<T extends DatabasePlugin> extends Observer<
 
   async stopContainer() {
     if (!this.hasRunningContainer) {
-      this.notifyObservers();
+      await this.fileProcessor.cleanupTempDir(this.tempDir);
       return null;
     }
 
@@ -73,8 +85,8 @@ export class DockerManager<T extends DatabasePlugin> extends Observer<
 
     await this.handleContainerOperation(async () => {
       await this.service.stopContainer(this.dockerContainerPath);
+      await this.fileProcessor.cleanupTempDir(this.tempDir);
       this.hasRunningContainer = false;
-      this.notifyObservers();
     }, "stop");
   }
 
@@ -88,6 +100,8 @@ export class DockerManager<T extends DatabasePlugin> extends Observer<
       this.tempDir,
       `docker-compose.${this.database.toLowerCase()}.yml`
     );
+
+    this.containerName = this.getContainerName(tempComposeFilePath);
 
     if (this.database === DatabaseType.MONGODB) {
       const initMongoFilePath = this.fileProcessor.getFilePath(
@@ -119,11 +133,28 @@ export class DockerManager<T extends DatabasePlugin> extends Observer<
   ) {
     try {
       await operation();
-    } catch (error: any) {
+    } catch (err: unknown) {
+      const error = ensureDockerException(err);
       this.errorHandler.handleError(
         error,
         `Failed to ${operationName} the ${this.database} container`
       );
     }
+  }
+
+  private getContainerName(composeFilePath: string) {
+    const baseName = composeFilePath
+      .split("\\")
+      [composeFilePath.split("\\").length - 2].toLowerCase();
+
+    const extensionMap: Record<DatabaseType, string> = {
+      [DatabaseType.POSTGRESQL]: POSTGRESQL_DOCKER_EXTENSION,
+      [DatabaseType.MONGODB]: MONGODB_DOCKER_EXTENSION,
+      [DatabaseType.MYSQL]: MYSQL_DOCKER_EXTENSION,
+    };
+
+    const extension = extensionMap[this.database];
+
+    return baseName + extension;
   }
 }

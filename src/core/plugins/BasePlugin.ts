@@ -28,6 +28,8 @@ export abstract class BasePlugin<T> implements DatabasePlugin {
   abstract delete(collectionName: string, query: DeleteQuery): Promise<any>;
   abstract insert(collectionName: string, data: InsertQuery): Promise<any>;
   abstract createTable(collectionName: string, schema?: object): Promise<void>;
+  abstract listTables(): Promise<{ name: string }[]>;
+  abstract count(collectionName: string, query: object): Promise<number>;
 
   protected objectToSql(query: object): string {
     return Object.entries(query)

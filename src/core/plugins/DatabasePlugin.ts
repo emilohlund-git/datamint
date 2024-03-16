@@ -1,4 +1,5 @@
 import {
+  CountQuery,
   DeleteQuery,
   FindQuery,
   InsertQuery,
@@ -12,7 +13,9 @@ export interface DatabasePlugin {
   update(tableName: string, query: UpdateQuery): Promise<any>;
   delete(tableName: string, query: DeleteQuery): Promise<any>;
   insert(tableName: string, query: InsertQuery): Promise<void>;
+  count(tableName: string, query: CountQuery): Promise<number>;
   reset(database: string): Promise<void>;
   createTable(tableName: string, schema?: object): Promise<any>;
+  listTables(): Promise<{ name: string }[]>;
   client: any;
 }

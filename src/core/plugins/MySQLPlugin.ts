@@ -1,5 +1,11 @@
 import mysql from "mysql2/promise";
-import { DeleteQuery, FindQuery, InsertQuery, UpdateQuery } from "./types";
+import {
+  CountQuery,
+  DeleteQuery,
+  FindQuery,
+  InsertQuery,
+  UpdateQuery,
+} from "./types";
 import { BasePlugin } from "../plugins/BasePlugin";
 
 export class MySQLPlugin extends BasePlugin<mysql.Connection> {
@@ -70,6 +76,17 @@ export class MySQLPlugin extends BasePlugin<mysql.Connection> {
     }
   }
 
+  async count(tableName: string, query: CountQuery): Promise<number> {
+    const sql = `SELECT COUNT(*) FROM ${tableName} WHERE ${this.objectToSql(
+      query
+    )}`;
+    const [result] = (await this.client?.query(sql)) as [
+      mysql.RowDataPacket[],
+      mysql.FieldPacket[]
+    ];
+    return result[0]["COUNT(*)"];
+  }
+
   async createTable(
     tableName: string,
     schema: Record<string, string>
@@ -81,5 +98,14 @@ export class MySQLPlugin extends BasePlugin<mysql.Connection> {
     const createTableSql = `CREATE TABLE IF NOT EXISTS ${tableName} (${fields});`;
 
     await this.client.query(createTableSql);
+  }
+
+  async listTables(): Promise<{ name: string }[]> {
+    const [rows] = (await this.client?.query("SHOW TABLES")) as [
+      mysql.RowDataPacket[],
+      mysql.FieldPacket[]
+    ];
+
+    return rows.map((row) => row[`Tables_in_${process.env.DB_NAME}`]);
   }
 }

@@ -1,6 +1,6 @@
 import { DatabasePlugin } from "./plugins/DatabasePlugin";
 import { DatabaseOptions } from "./interfaces/DatabaseOptions";
-import { DatabaseType, Emoji, LogColor } from "./enums";
+import { DatabaseType, Emoji } from "./enums";
 import { DatamintManager } from "./DatamintManager";
 import { DockerManager } from "./docker/DockerManager";
 import { LoggerService } from "./logging/LoggerService";
