@@ -22,6 +22,6 @@ export function withDatamint<T extends DatabasePlugin>(
       await client.disconnect();
       await mint.stop();
     },
-    run: () => testSuite(client),
+    run: async () => testSuite(client),
   };
 }

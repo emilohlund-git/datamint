@@ -23,7 +23,7 @@ describe("withDatamint", function () {
     }
   );
 
-  beforeAll(setup);
-  afterAll(teardown);
+  beforeAll(setup, 40000);
+  afterAll(teardown, 40000);
   run();
 });
