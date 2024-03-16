@@ -3,6 +3,9 @@
   "installation": "Installation",
   "getting-started": "Getting Started",
   "configuration": "Configuration",
+  "---": {
+    "type": "separator"
+  },
   "usage-examples": "Usage Examples",
   "features": "Features",
   "about": {
