@@ -21,7 +21,9 @@
     "build": "tsc && npm run copy",
     "prepare": "npm run build",
     "copy": "copyfiles -u 1 src/docker/* dist",
-    "test": "jest --detectOpenHandles",
+    "test": "LOGGING_DISABLED=true jest --detectOpenHandles",
+    "test:logging": "jest --detectOpenHandles",
+    "test:debug": "node runJest.js --inspect --runInBand",
     "coverage": "jest --coverage && cat ./coverage/lcov.info | coveralls"
   },
   "keywords": [
@@ -32,6 +34,7 @@
   "author": "Emil Ölund",
   "license": "ISC",
   "devDependencies": {
+    "@types/heapdump": "^0.3.4",
     "@types/jest": "^29.5.12",
     "@types/mock-fs": "^4.13.4",
     "@types/node": "^20.11.27",
@@ -49,6 +52,7 @@
     "typescript": "^5.4.2"
   },
   "dependencies": {
+    "heapdump": "^0.3.15",
     "mongodb": "^6.5.0",
     "mysql2": "^3.9.2",
     "pg-promise": "^11.5.4",

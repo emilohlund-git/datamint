@@ -7,3 +7,4 @@ key.pem
 coverage
 .vscode
 dist
+*.heapsnapshot
