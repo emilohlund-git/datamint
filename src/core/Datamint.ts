@@ -54,6 +54,7 @@ export class Datamint<T extends DatabasePlugin> extends Observer<
 
     if (DatamintManager.getInstances().length === 0) {
       await this.fileProcessor.cleanupTempDirs();
+      await this.dockerManager.stopContainer();
       process.exit(0);
     }
   }
