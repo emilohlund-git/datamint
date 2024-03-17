@@ -16,6 +16,7 @@ export enum Emoji {
   KAFKA = "🦘",
   DOCKER = "🐳",
   DOCKER_COMPOSE = "🐋",
+  PORT = "🔌",
   GITHUB = "🐙",
   GITLAB = "🦊",
   BITBUCKET = "🦜",

@@ -4,8 +4,10 @@ import { promisify } from "util";
 import { DatabaseOptions } from "./interfaces";
 import { rimraf } from "rimraf";
 import { LoggerService } from "./logging";
-import { DatabaseType, Emoji, LogColor, LogStyle } from "./enums";
+import { DatabaseType, Emoji } from "./enums";
 import { Observer } from "./Observer";
+import { DatamintManager } from "src/core/DatamintManager";
+import { randomUUID } from "crypto";
 
 const mkdtemp = promisify(fs.mkdtemp);
 const copyFile = promisify(fs.copyFile);
@@ -39,12 +41,13 @@ export class FileProcessor extends Observer<FileProcessor> {
   async processFile(
     sourcePath: string,
     destinationPath: string,
-    options: DatabaseOptions
+    options: DatabaseOptions,
+    database: DatabaseType
   ) {
     await this.copyFile(sourcePath, destinationPath);
 
     let fileContent = await this.readFile(sourcePath);
-    fileContent = await this.parseComposeFile(fileContent, options);
+    fileContent = await this.parseComposeFile(fileContent, options, database);
 
     await this.writeFile(destinationPath, fileContent);
   }
@@ -65,7 +68,11 @@ export class FileProcessor extends Observer<FileProcessor> {
     await writeFile(filePath, data);
   }
 
-  async parseComposeFile(sourceFileContent: string, options: DatabaseOptions) {
+  async parseComposeFile(
+    sourceFileContent: string,
+    options: DatabaseOptions,
+    database: DatabaseType
+  ) {
     let targetFileContent = sourceFileContent.replace(
       /\${DB_USER}/g,
       options.user
@@ -75,6 +82,14 @@ export class FileProcessor extends Observer<FileProcessor> {
       options.password
     );
     targetFileContent = targetFileContent.replace(/\${DB_NAME}/g, options.name);
+    targetFileContent = targetFileContent.replace(
+      /\${NETWORK_NAME}/g,
+      `datamint-${database}-${randomUUID()}`
+    );
+    targetFileContent = targetFileContent.replace(
+      /\${DB_PORT}/g,
+      options.port.toString()
+    );
 
     return targetFileContent;
   }

@@ -1,11 +1,6 @@
-import {
-  COMPOSE_FILE,
-  DOCKER_DIR,
-  INIT_MONGO_FILE,
-  Spinners,
-} from "../constants";
+import { COMPOSE_FILE, DOCKER_DIR, INIT_MONGO_FILE } from "../constants";
 import { DockerService } from "./DockerService";
-import { DatabaseType, Emoji, LogColor, LogStyle } from "../enums";
+import { DatabaseType, Emoji } from "../enums";
 import { DatabaseOptions } from "../interfaces";
 import path from "path";
 import { LoggerService } from "../logging/LoggerService";
@@ -33,6 +28,7 @@ export class DockerManager<T extends DatabasePlugin> extends Observer<
   private fileProcessor: FileProcessor;
   private client: DatamintClient<T>;
   private errorHandler: DockerErrorHandler<T>;
+  private _port: number;
 
   constructor(
     database: DatabaseType,
@@ -41,6 +37,7 @@ export class DockerManager<T extends DatabasePlugin> extends Observer<
   ) {
     super(database);
 
+    this._port = options.port;
     this.options = options;
     this.errorHandler = new DockerErrorHandler(this, database);
     this.service = new DockerService();
@@ -124,14 +121,16 @@ export class DockerManager<T extends DatabasePlugin> extends Observer<
       await this.fileProcessor.processFile(
         initMongoFilePath,
         tempInitMongoFilePath,
-        this.options
+        this.options,
+        this.database
       );
     }
 
     await this.fileProcessor.processFile(
       composeFilePath,
       tempComposeFilePath,
-      this.options
+      this.options,
+      this.database
     );
 
     this.dockerContainerPath = tempComposeFilePath;

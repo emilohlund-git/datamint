@@ -5,6 +5,7 @@ import {
   PostgreSQLPlugin,
 } from "../plugins";
 import type {
+  AggregateQuery,
   CountQuery,
   DeleteQuery,
   FindQuery,
@@ -61,6 +62,10 @@ export class DatamintClient<T extends DatabasePlugin> {
     return await this._plugin.count(collection, query);
   }
 
+  async aggregate(collection: string, query: AggregateQuery) {
+    return await this._plugin.aggregate(collection, query);
+  }
+
   async listTables() {
     return await this._plugin.listTables();
   }
@@ -78,9 +83,9 @@ export class DatamintClient<T extends DatabasePlugin> {
     }
 
     const connectionStrings: Record<DatabaseType, string> = {
-      [DatabaseType.POSTGRESQL]: `postgres://${this.options.user}:${this.options.password}@localhost:5432/${this.options.name}`,
-      [DatabaseType.MYSQL]: `mysql://${this.options.user}:${this.options.password}@localhost:3306/${this.options.name}`,
-      [DatabaseType.MONGODB]: `mongodb://${this.options.user}:${this.options.password}@localhost:27017/${this.options.name}`,
+      [DatabaseType.POSTGRESQL]: `postgres://${this.options.user}:${this.options.password}@localhost:${this.options.port}/${this.options.name}`,
+      [DatabaseType.MYSQL]: `mysql://${this.options.user}:${this.options.password}@localhost:${this.options.port}/${this.options.name}`,
+      [DatabaseType.MONGODB]: `mongodb://${this.options.user}:${this.options.password}@localhost:${this.options.port}/${this.options.name}`,
     };
 
     const connectionString = connectionStrings[this.database];

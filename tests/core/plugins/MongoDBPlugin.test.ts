@@ -7,15 +7,41 @@ const mockConfig = {
   name: "mongo-db",
   user: "test",
   password: "test",
+  port: 27017,
 };
+
+class TestableMongoDBPlugin extends MongoDBPlugin {
+  public escapeValueExposed(value: any): string {
+    return this.escapeValue(value);
+  }
+}
 
 describe("MongoDBPlugin", () => {
   const { setup, teardown, run } = withDatamint(
     DatabaseType.MONGODB,
     mockConfig,
-    (client: DatamintClient<MongoDBPlugin>) => {
+    async (client: DatamintClient<MongoDBPlugin>) => {
+      let plugin: TestableMongoDBPlugin;
+
       beforeEach(async () => {
+        plugin = new TestableMongoDBPlugin();
         await client.reset();
+      });
+
+      test("escapeValue method", () => {
+        const value = { key: "value" };
+        const escapedValue = plugin.escapeValueExposed(value);
+        expect(escapedValue).toEqual(JSON.stringify(value));
+      });
+
+      test("aggregate data", async () => {
+        const collectionName = "test";
+        const data = { key: "value" };
+        await client.insert(collectionName, [data]);
+        const result = await client.aggregate(collectionName, [
+          { $match: { key: "value" } },
+        ]);
+        expect(result).toEqual([data]);
       });
 
       test("insert and find data", async () => {

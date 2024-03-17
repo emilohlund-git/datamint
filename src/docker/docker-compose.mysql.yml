@@ -9,7 +9,7 @@ services:
       MYSQL_DATABASE: '${DB_NAME}'
       MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
     ports:
-      - '3306:3306'
+      - '${DB_PORT}:3306'
 networks:
   default:
-      name: datamint-mysql
+      name: ${NETWORK_NAME}

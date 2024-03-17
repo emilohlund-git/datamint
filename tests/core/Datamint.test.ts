@@ -12,6 +12,7 @@ describe("Datamint", () => {
     name: "mockDatabase",
     password: "mockPassword",
     user: "mockUser",
+    port: 1234
   };
 
   beforeEach(() => {

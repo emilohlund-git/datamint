@@ -1,4 +1,6 @@
 import {
+  AggregateQuery,
+  Condition,
   DeleteQuery,
   FindQuery,
   InsertQuery,
@@ -30,6 +32,10 @@ export abstract class BasePlugin<T> implements DatabasePlugin {
   abstract createTable(collectionName: string, schema?: object): Promise<void>;
   abstract listTables(): Promise<{ name: string }[]>;
   abstract count(collectionName: string, query: object): Promise<number>;
+  abstract aggregate(
+    collectionName: string,
+    query: AggregateQuery
+  ): Promise<any>;
 
   protected objectToSql(query: object): string {
     return Object.entries(query)
@@ -47,4 +53,100 @@ export abstract class BasePlugin<T> implements DatabasePlugin {
   }
 
   protected abstract escapeValue(value: any): string;
+
+  protected translateAggregateQuery(
+    tableName: string,
+    query: AggregateQuery
+  ): string {
+    let selectFields: string[] = [];
+    let groupByFields: string[] = [];
+    let whereClause = "";
+    let sort = "";
+
+    for (const stage of query) {
+      if ("$match" in stage) {
+        const conditions = this.translateMatchStage(stage["$match"]);
+        whereClause = " WHERE " + conditions;
+      } else if ("$group" in stage) {
+        Object.entries(stage["$group"]).forEach(([field, value]) => {
+          if (typeof value === "object" && "$count" in value) {
+            selectFields.push(`COUNT(\`${value.$count}\`) AS count`);
+          } else {
+            selectFields.push(`\`${field}\``);
+            groupByFields.push(`\`${field}\``);
+          }
+        });
+      } else if ("$sort" in stage) {
+        sort = this.translateSortStage(stage["$sort"]);
+      }
+    }
+
+    if (selectFields.length === 0) {
+      selectFields.push("*");
+    }
+
+    let sqlQuery = `SELECT ${selectFields.join(", ")} FROM \`${tableName}\``;
+
+    if (whereClause) {
+      sqlQuery += whereClause;
+    }
+
+    if (groupByFields.length > 0) {
+      sqlQuery += " GROUP BY " + groupByFields.join(", ");
+    }
+
+    if (sort) {
+      sqlQuery += " ORDER BY " + sort;
+    }
+
+    return sqlQuery;
+  }
+
+  protected translateSortStage(sort: { [key: string]: 1 | -1 }): string {
+    return Object.entries(sort)
+      .map(
+        ([field, direction]) =>
+          `\`${field}\` ${direction === 1 ? "ASC" : "DESC"}`
+      )
+      .join(", ");
+  }
+
+  protected translateMatchStage(match: {
+    [key: string]: string | number | Condition;
+  }): string {
+    const conditions = Object.entries(match).map(([key, value]) => {
+      if (typeof value === "object") {
+        return this.translateComplexCondition(key, value);
+      } else {
+        return `\`${key}\` = '${value}'`;
+      }
+    });
+
+    return conditions.join(" AND ");
+  }
+
+  protected translateComplexCondition(
+    field: string,
+    condition: Condition
+  ): string {
+    const operatorMap = {
+      $gt: ">",
+      $lt: "<",
+      $gte: ">=",
+      $lte: "<=",
+      $eq: "=",
+    };
+
+    const conditions = Object.entries(condition).map(([operator, value]) => {
+      if (operator in operatorMap) {
+        return `\`${field}\` ${
+          operatorMap[operator as keyof object]
+        } '${value}'`;
+      } else {
+        throw new Error(`Unsupported operator: ${operator}`);
+      }
+    });
+
+    return conditions.join(" AND ");
+  }
 }

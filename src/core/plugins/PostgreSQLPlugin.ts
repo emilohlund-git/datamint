@@ -1,5 +1,7 @@
 import pgPromise, { IDatabase } from "pg-promise";
 import {
+  AggregateQuery,
+  Condition,
   CountQuery,
   DeleteQuery,
   FindQuery,
@@ -7,20 +9,19 @@ import {
   UpdateQuery,
 } from "./types";
 import { BasePlugin } from "../plugins/BasePlugin";
+import { ensureDatabaseException } from "src/core/utils";
 
 export class PostgreSQLPlugin extends BasePlugin<IDatabase<any>> {
   private _pgp: pgPromise.IMain;
 
   async connect(connectionString: string): Promise<void> {
-    if (!this._client) {
-      this._pgp = pgPromise();
-      this._client = this._pgp(connectionString);
-
-      try {
-        await this._client.connect();
-      } catch (error: any) {
-        throw new Error(`Failed to connect to the database: ${error.message}`);
-      }
+    this._pgp = pgPromise();
+    this._client = this._pgp(connectionString);
+    try {
+      await this._client.connect();
+    } catch (err: unknown) {
+      const error = ensureDatabaseException(err);
+      throw new Error(`Failed to connect to the database: ${error.message}`);
     }
   }
 
@@ -29,7 +30,9 @@ export class PostgreSQLPlugin extends BasePlugin<IDatabase<any>> {
     await this.client.none("CREATE SCHEMA public");
   }
 
-  async disconnect(): Promise<void> {}
+  async disconnect(): Promise<void> {
+    this._pgp.end();
+  }
 
   async find(tableName: string, conditions: FindQuery): Promise<any[]> {
     const whereClauses = Object.entries(conditions)
@@ -55,13 +58,13 @@ export class PostgreSQLPlugin extends BasePlugin<IDatabase<any>> {
     const sql = `UPDATE ${tableName} SET ${this.objectToSql(
       query.update
     )} WHERE ${this.objectToSql(query.filter)}`;
-    const [result] = await this.client?.query(sql);
+    const [result] = await this.client.query(sql);
     return result;
   }
 
   async delete(tableName: string, query: DeleteQuery): Promise<any> {
     const sql = `DELETE FROM ${tableName} WHERE ${this.objectToSql(query)}`;
-    const [result] = await this.client?.query(sql);
+    const [result] = await this.client.query(sql);
     return result;
   }
 
@@ -84,8 +87,14 @@ export class PostgreSQLPlugin extends BasePlugin<IDatabase<any>> {
   async count(tableName: string, query: CountQuery): Promise<number> {
     const whereClause = this.objectToSql(query);
     const sql = `SELECT COUNT(*) FROM ${tableName} WHERE ${whereClause}`;
-    const [{ count }] = await this.client?.query(sql);
+    const [{ count }] = await this.client.query(sql);
     return +count;
+  }
+
+  async aggregate(tableName: string, query: AggregateQuery): Promise<any> {
+    const sql = this.translateAggregateQuery(tableName, query);
+    const [rows] = await this.client.query(sql);
+    return rows;
   }
 
   async createTable(
@@ -98,7 +107,12 @@ export class PostgreSQLPlugin extends BasePlugin<IDatabase<any>> {
 
     const createTableSql = `CREATE TABLE IF NOT EXISTS ${tableName} (${fields});`;
 
-    await this.client.query(createTableSql);
+    try {
+      await this.client.none(createTableSql);
+    } catch (err: unknown) {
+      const error = ensureDatabaseException(err);
+      throw new Error(`Failed to create table: ${error.message}`);
+    }
   }
 
   async listTables(): Promise<{ name: string }[]> {
@@ -106,5 +120,100 @@ export class PostgreSQLPlugin extends BasePlugin<IDatabase<any>> {
     const tables = await this.client.manyOrNone(query);
 
     return tables.map((table) => table.table_name);
+  }
+
+  protected translateAggregateQuery(
+    tableName: string,
+    query: AggregateQuery
+  ): string {
+    let selectFields: string[] = [];
+    let groupByFields: string[] = [];
+    let whereClause = "";
+    let sort = "";
+
+    for (const stage of query) {
+      if ("$match" in stage) {
+        const conditions = this.translateMatchStage(stage["$match"]);
+        whereClause = " WHERE " + conditions;
+      } else if ("$group" in stage) {
+        Object.entries(stage["$group"]).forEach(([field, value]) => {
+          if (typeof value === "object" && "$count" in value) {
+            selectFields.push(
+              `COUNT("${value.$count.toLowerCase()}") AS count`
+            );
+          } else {
+            selectFields.push(`"${field.toLowerCase()}"`);
+            groupByFields.push(`"${field.toLowerCase()}"`);
+          }
+        });
+      } else if ("$sort" in stage) {
+        sort = this.translateSortStage(stage["$sort"]);
+      }
+    }
+
+    if (selectFields.length === 0) {
+      selectFields.push("*");
+    }
+
+    let sqlQuery = `SELECT ${selectFields.join(", ")} FROM "${tableName}"`;
+
+    if (whereClause) {
+      sqlQuery += whereClause;
+    }
+
+    if (groupByFields.length > 0) {
+      sqlQuery += " GROUP BY " + groupByFields.join(", ");
+    }
+
+    if (sort) {
+      sqlQuery += " ORDER BY " + sort;
+    }
+
+    return sqlQuery;
+  }
+
+  protected translateSortStage(sort: { [key: string]: 1 | -1 }): string {
+    return Object.entries(sort)
+      .map(
+        ([field, direction]) => `"${field}" ${direction === 1 ? "ASC" : "DESC"}`
+      )
+      .join(", ");
+  }
+
+  protected translateMatchStage(match: {
+    [key: string]: string | number | Condition;
+  }): string {
+    const conditions = Object.entries(match).map(([key, value]) => {
+      if (typeof value === "object") {
+        return this.translateComplexCondition(key, value);
+      } else {
+        return `"${key}" = '${value}'`;
+      }
+    });
+
+    return conditions.join(" AND ");
+  }
+
+  protected translateComplexCondition(
+    field: string,
+    condition: Condition
+  ): string {
+    const operatorMap = {
+      $gt: ">",
+      $lt: "<",
+      $gte: ">=",
+      $lte: "<=",
+      $eq: "=",
+    };
+
+    const conditions = Object.entries(condition).map(([operator, value]) => {
+      if (operator in operatorMap) {
+        return `"${field}" ${operatorMap[operator as keyof object]} '${value}'`;
+      } else {
+        throw new Error(`Unsupported operator: ${operator}`);
+      }
+    });
+
+    return conditions.join(" AND ");
   }
 }

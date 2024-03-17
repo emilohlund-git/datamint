@@ -31,6 +31,7 @@ describe("FileProcessor", () => {
       name: "mockDatabase",
       password: "mockPassword",
       user: "mockUser",
+      port: 1234
     };
   });
 
@@ -48,7 +49,12 @@ describe("FileProcessor", () => {
     const sourcePath = "src/file.txt";
     const destinationPath = "src/docker/datamint-/file.txt";
 
-    await fileProcessor.processFile(sourcePath, destinationPath, mockOptions);
+    await fileProcessor.processFile(
+      sourcePath,
+      destinationPath,
+      mockOptions,
+      DatabaseType.MONGODB,
+    );
 
     const fileContent = await fileProcessor.readFile(destinationPath);
     expect(fileContent).toContain(mockOptions.user);

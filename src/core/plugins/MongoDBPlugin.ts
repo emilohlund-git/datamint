@@ -1,4 +1,4 @@
-import { MongoClient, Db } from "mongodb";
+import { MongoClient } from "mongodb";
 import {
   AggregateQuery,
   CountQuery,
@@ -41,27 +41,24 @@ export class MongoDBPlugin extends BasePlugin<MongoClient> {
 
   async update(collectionName: string, query: UpdateQuery): Promise<any> {
     const collection = this.client.db().collection(collectionName);
-    const { filter, update } = query as UpdateQuery;
+    const { filter, update } = query;
     return collection.updateMany(filter, update);
   }
 
   async delete(collectionName: string, query: DeleteQuery): Promise<any> {
     const collection = this.client.db().collection(collectionName);
-    return collection.deleteMany(query as DeleteQuery);
+    return collection.deleteMany(query);
   }
 
   async count(collectionName: string, query: CountQuery): Promise<any> {
-    return this.client
-      .db()
-      .collection(collectionName)
-      .countDocuments(query as CountQuery);
+    return this.client.db().collection(collectionName).countDocuments(query);
   }
 
   async aggregate(collectionName: string, query: AggregateQuery): Promise<any> {
     return this.client
       .db()
       .collection(collectionName)
-      .aggregate(query as AggregateQuery)
+      .aggregate(query)
       .toArray();
   }
 

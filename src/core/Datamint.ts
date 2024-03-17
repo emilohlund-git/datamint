@@ -58,4 +58,8 @@ export class Datamint<T extends DatabasePlugin> extends Observer<
       process.exit(0);
     }
   }
+
+  get manager(): DockerManager<T> {
+    return this.dockerManager;
+  }
 }

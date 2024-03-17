@@ -10,6 +10,7 @@ describe("DatamintManager", () => {
     name: "mockDatabase",
     password: "mockPassword",
     user: "mockUser",
+    port: 1234,
   };
   let instance: Datamint<DatabasePlugin>;
 

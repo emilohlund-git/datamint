@@ -1,5 +1,6 @@
 import mysql from "mysql2/promise";
 import {
+  AggregateQuery,
   CountQuery,
   DeleteQuery,
   FindQuery,
@@ -7,20 +8,23 @@ import {
   UpdateQuery,
 } from "./types";
 import { BasePlugin } from "../plugins/BasePlugin";
+import { ensureDatabaseException } from "src/core/utils";
 
 export class MySQLPlugin extends BasePlugin<mysql.Connection> {
   async connect(connectionString: string): Promise<void> {
     try {
       this._client = await mysql.createConnection(connectionString);
       await this._client.connect();
-    } catch (error) {
-      throw error;
+    } catch (err: unknown) {
+      const error = ensureDatabaseException(err);
+      throw new Error(`Failed to connect to the database: ${error.message}`);
     }
   }
 
   async reset(database: string): Promise<void> {
-    await this.client.query(`DROP DATABASE IF EXISTS ${database}`);
-    await this.client.query(`CREATE DATABASE ${database}`);
+    await this.client.query(`DROP DATABASE IF EXISTS \`${database}\``);
+    await this.client.query(`CREATE DATABASE \`${database}\``);
+    await this.client.query(`USE \`${database}\``);
   }
 
   async disconnect(): Promise<void> {
@@ -66,12 +70,14 @@ export class MySQLPlugin extends BasePlugin<mysql.Connection> {
 
   async insert(tableName: string, data: InsertQuery): Promise<void> {
     for (const row of data) {
-      const fields = Object.keys(row).join(", ");
+      const fields = Object.keys(row)
+        .map((key) => `\`${key}\``)
+        .join(", ");
       const placeholders = Object.keys(row)
         .map(() => "?")
         .join(", ");
       const values = Object.values(row);
-      const query = `INSERT INTO ${tableName} (${fields}) VALUES (${placeholders});`;
+      const query = `INSERT INTO \`${tableName}\` (${fields}) VALUES (${placeholders});`;
       await this.client.query(query, values);
     }
   }
@@ -87,15 +93,24 @@ export class MySQLPlugin extends BasePlugin<mysql.Connection> {
     return result[0]["COUNT(*)"];
   }
 
+  async aggregate(tableName: string, query: AggregateQuery): Promise<any> {
+    const sql = this.translateAggregateQuery(tableName, query);
+    const [rows] = (await this.client.query(sql)) as [
+      mysql.RowDataPacket[],
+      mysql.FieldPacket[]
+    ];
+    return rows;
+  }
+
   async createTable(
     tableName: string,
     schema: Record<string, string>
   ): Promise<void> {
     const fields = Object.entries(schema)
-      .map(([columnName, columnType]) => `${columnName} ${columnType}`)
+      .map(([columnName, columnType]) => `\`${columnName}\` ${columnType}`)
       .join(", ");
 
-    const createTableSql = `CREATE TABLE IF NOT EXISTS ${tableName} (${fields});`;
+    const createTableSql = `CREATE TABLE IF NOT EXISTS \`${tableName}\` (${fields});`;
 
     await this.client.query(createTableSql);
   }
