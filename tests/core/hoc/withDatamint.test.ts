@@ -6,7 +6,7 @@ import { PostgreSQLPlugin } from "@datamint/core/plugins";
 describe("withDatamint", function () {
   const { setup, teardown, run } = withDatamint(
     DatabaseType.POSTGRESQL,
-    { name: "test", user: "test", password: "test", port: 3306 },
+    { name: "test", user: "test", password: "test", port: 5433 },
     (client: DatamintClient<PostgreSQLPlugin>) => {
       it("should run a test", async () => {
         const testData = [{ id: 1, name: "John" }];

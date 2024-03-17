@@ -10,6 +10,7 @@ import {
 } from "./types";
 import { BasePlugin } from "../plugins/BasePlugin";
 import { ensureDatabaseException } from "src/core/utils";
+import { DatabaseException } from "../database/exceptions";
 
 export class PostgreSQLPlugin extends BasePlugin<Client> {
   async connect(connectionString: string): Promise<void> {
@@ -18,7 +19,7 @@ export class PostgreSQLPlugin extends BasePlugin<Client> {
       await this._client.connect();
     } catch (err: unknown) {
       const error = ensureDatabaseException(err);
-      throw new Error(`Failed to connect to the database: ${error.message}`);
+      throw new DatabaseException(`Failed to connect to the database: ${error.message}`);
     }
   }
 
@@ -28,7 +29,14 @@ export class PostgreSQLPlugin extends BasePlugin<Client> {
   }
 
   async disconnect(): Promise<void> {
-    await this.client.end();
+    try {
+      await this.client.end();
+    } catch (err: unknown) {
+      const error = ensureDatabaseException(err);
+      throw new Error(
+        `Failed to disconnect from the database: ${error.message}`
+      );
+    }
   }
 
   async find(tableName: string, conditions: FindQuery): Promise<any[]> {

@@ -138,7 +138,9 @@ export class DatamintClient<T extends DatabasePlugin> {
           Emoji.CHECK
         );
 
-        return await this._plugin.disconnect();
+        await this._plugin.disconnect();
+
+        return;
       } catch (err: any) {
         attempts++;
         LoggerService.warning(

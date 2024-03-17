@@ -25,7 +25,7 @@ export class LoggerService {
       Emoji.DEBUG,
       LogColor.MAGENTA,
       LogStyle.BRIGHT,
-      Verbosity.INFO,
+      Verbosity.DEBUG,
       BackgroundColor.BLACK
     );
   }

@@ -3,7 +3,7 @@ import { DatabaseOptions } from "./interfaces/DatabaseOptions";
 import { DatabaseType, Emoji, LogColor, LogStyle } from "./enums";
 import { DatamintManager } from "./DatamintManager";
 import { DockerManager } from "./docker/DockerManager";
-import { LoggerService } from "./logging/LoggerService";
+import { LoggerService, Verbosity } from "./logging/LoggerService";
 import { Observer } from "./Observer";
 import { FileProcessor } from "./FileProcessor";
 
@@ -15,7 +15,7 @@ export class Datamint<T extends DatabasePlugin> extends Observer<
 
   constructor(database: DatabaseType, options: DatabaseOptions) {
     super(database);
-
+    LoggerService.verbosity = Verbosity.NONE
     LoggerService.debug(`Creating a new ${database} Datamint...`);
     this.fileProcessor = new FileProcessor(database);
     this.fileProcessor.addObserver(this);

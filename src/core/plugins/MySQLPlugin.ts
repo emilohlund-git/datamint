@@ -9,6 +9,7 @@ import {
 } from "./types";
 import { BasePlugin } from "../plugins/BasePlugin";
 import { ensureDatabaseException } from "src/core/utils";
+import { DatabaseException } from "../database/exceptions";
 
 export class MySQLPlugin extends BasePlugin<mysql.Connection> {
   async connect(connectionString: string): Promise<void> {
@@ -17,7 +18,7 @@ export class MySQLPlugin extends BasePlugin<mysql.Connection> {
       await this._client.connect();
     } catch (err: unknown) {
       const error = ensureDatabaseException(err);
-      throw new Error(`Failed to connect to the database: ${error.message}`);
+      throw new DatabaseException(`Failed to connect to the database: ${error.message}`);
     }
   }
 
@@ -28,7 +29,14 @@ export class MySQLPlugin extends BasePlugin<mysql.Connection> {
   }
 
   async disconnect(): Promise<void> {
-    await this.client.end();
+    try {
+      await this.client.end();
+    } catch (err: unknown) {
+      const error = ensureDatabaseException(err);
+      throw new Error(
+        `Failed to disconnect from the database: ${error.message}`
+      );
+    }
   }
 
   async find(tableName: string, query: FindQuery): Promise<any> {

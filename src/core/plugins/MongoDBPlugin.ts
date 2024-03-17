@@ -8,11 +8,19 @@ import {
   InsertQuery,
 } from "../plugins/types";
 import { BasePlugin } from "../plugins/BasePlugin";
+import { ensureDatabaseException } from "../utils";
+import { LoggerService } from "../logging";
+import { DatabaseException } from "../database/exceptions";
 
 export class MongoDBPlugin extends BasePlugin<MongoClient> {
   async connect(connectionString: string): Promise<void> {
-    this._client = new MongoClient(connectionString);
-    await this._client.connect();
+    try {
+      this._client = new MongoClient(connectionString);
+      await this._client.connect();
+    } catch (err: unknown) {
+      const error = ensureDatabaseException(err);
+      throw new DatabaseException(error.message);
+    }
   }
 
   async reset(database: string): Promise<void> {
@@ -23,7 +31,15 @@ export class MongoDBPlugin extends BasePlugin<MongoClient> {
   }
 
   async disconnect(): Promise<void> {
-    await this.client.close();
+    try {
+      await this.client.close();
+    } catch (err: unknown) {
+      const error = ensureDatabaseException(err);
+      LoggerService.error(error.message);
+      throw new Error(
+        `Failed to disconnect from the database: ${error.message}`
+      );
+    }
   }
 
   protected escapeValue(value: any): string {

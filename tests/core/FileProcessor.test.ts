@@ -21,7 +21,7 @@ describe("FileProcessor", () => {
         "datamint-": {},
       },
       "src/file.txt":
-        "DB_USER=${DB_USER}\nDB_PASSWORD=${DB_PASSWORD}\nDB_NAME=${DB_NAME}",
+        "DB_USER=${DB_USER}\nDB_PASSWORD=${DB_PASSWORD}\nDB_NAME=${DB_NAME}\nDB_PORT=${DB_PORT}\nNETWORK_NAME=${NETWORK_NAME}",
       node_modules: mockFs.load(nodeModulesDir),
     });
 
@@ -31,7 +31,7 @@ describe("FileProcessor", () => {
       name: "mockDatabase",
       password: "mockPassword",
       user: "mockUser",
-      port: 1234
+      port: 1234,
     };
   });
 
@@ -53,7 +53,7 @@ describe("FileProcessor", () => {
       sourcePath,
       destinationPath,
       mockOptions,
-      DatabaseType.MONGODB,
+      DatabaseType.MONGODB
     );
 
     const fileContent = await fileProcessor.readFile(destinationPath);

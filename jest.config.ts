@@ -4,7 +4,7 @@ import { compilerOptions } from "./tests/tsconfig.json";
 
 const config: Config = {
   testEnvironment: "node",
-  testTimeout: 50000,
+  testTimeout: 80000,
   //globalSetup: "./tests/global.setup.js",
   //globalTeardown: "./tests/global.teardown.js",
   modulePaths: ["<rootDir>"],

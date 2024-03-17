@@ -44,16 +44,20 @@ export class FileProcessor extends Observer<FileProcessor> {
     options: DatabaseOptions,
     database: DatabaseType
   ) {
+    LoggerService.debug(`Processing files at ${sourcePath}`);
     await this.copyFile(sourcePath, destinationPath);
 
     let fileContent = await this.readFile(sourcePath);
     fileContent = await this.parseComposeFile(fileContent, options, database);
 
     await this.writeFile(destinationPath, fileContent);
+    LoggerService.debug(`Processed files at ${sourcePath}`);
   }
 
   async copyFile(source: string, destination: string) {
+    LoggerService.debug(`Copying file from ${source} to ${destination}`);
     await copyFile(source, destination);
+    LoggerService.debug(`Copied file from ${source} to ${destination}`);
   }
 
   async removeFile(filePath: string) {

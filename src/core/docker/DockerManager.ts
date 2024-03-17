@@ -68,7 +68,9 @@ export class DockerManager<T extends DatabasePlugin> extends Observer<
       );
       this.hasRunningContainer = true;
       LoggerService.debug(`Started docker container for ${this.database}...`);
-      LoggerService.debug(`Checking database connection for ${this.database}...`);
+      LoggerService.debug(
+        `Checking database connection for ${this.database}...`
+      );
       await this.client.checkDatabaseConnection();
       LoggerService.debug(`Connection successful for ${this.database}...`);
     }, "start");
@@ -76,9 +78,13 @@ export class DockerManager<T extends DatabasePlugin> extends Observer<
 
   async stopContainer() {
     if (!this.hasRunningContainer) {
-      LoggerService.debug(`Cleaning non-running container for ${this.database}...`);
+      LoggerService.debug(
+        `Cleaning non-running container for ${this.database}...`
+      );
       await this.fileProcessor.cleanupTempDir(this.tempDir);
-      LoggerService.debug(`Cleaned up non-running container for ${this.database}...`);
+      LoggerService.debug(
+        `Cleaned up non-running container for ${this.database}...`
+      );
       return null;
     }
 
@@ -97,11 +103,6 @@ export class DockerManager<T extends DatabasePlugin> extends Observer<
       );
       this.hasRunningContainer = false;
     }, "stop");
-
-    LoggerService.info(
-      `The ${this.database} container has been stopped.`,
-      Emoji[this.database.toUpperCase() as keyof typeof Emoji]
-    );
   }
 
   private async prepareFiles() {
@@ -151,7 +152,7 @@ export class DockerManager<T extends DatabasePlugin> extends Observer<
       await operation();
     } catch (err: unknown) {
       const error = ensureDockerException(err);
-      this.errorHandler.handleError(
+      await this.errorHandler.handleError(
         error,
         `Failed to ${operationName} the ${this.database} container`
       );
