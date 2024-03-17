@@ -48,7 +48,9 @@ describe("MySQLPlugin", () => {
     });
   });
 
-  beforeAll(setup);
-  afterAll(teardown);
+  beforeAll(() => setup());
+
+  afterAll(() => teardown());
+
   run();
 });

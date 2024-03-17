@@ -24,7 +24,9 @@ describe("withDatamint", function () {
     });
   });
 
-  beforeAll(setup);
-  afterAll(teardown);
+  beforeAll(() => setup());
+
+  afterAll(() => teardown());
+
   run();
 });
