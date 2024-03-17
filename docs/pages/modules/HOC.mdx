@@ -22,8 +22,8 @@ const { setup, teardown, run } = withDatamint(
   }
 );
 
-beforeAll(() => setup());
-afterAll(() => teardown());
+beforeAll(async () => await setup());
+afterAll(async () => await teardown());
 run();
 ```
 
@@ -48,8 +48,8 @@ describe("withDatamint", () => {
     }
   );
 
-  beforeAll(setup);
-  afterAll(teardown);
+  beforeAll(async () => await setup());
+  afterAll(async () => await teardown());
   run();
 });
 ```
@@ -69,8 +69,8 @@ describe("withDatamint", () => {
     }
   );
 
-  before(setup);
-  after(teardown);
+  beforeAll(async () => await setup());
+  afterAll(async () => await teardown());
   run();
 });
 ```
@@ -90,8 +90,8 @@ describe("withDatamint", () => {
     }
   );
 
-  beforeAll(setup);
-  afterAll(teardown);
+  beforeAll(async () => await setup());
+  afterAll(async () => await teardown());
   run();
 });
 ```

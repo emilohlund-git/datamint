@@ -101,6 +101,48 @@ We do not need to set up any Docker container logic at this point, we handled al
 You can choose to do so in the `beforeAll` and `afterAll` methods if you wish. But considering it takes a little while to spin up Docker containers,
 I would recommend an approach where you handle this logic before and after the test suite lifecycle.
 
+## Setting up Datamint per Test Suite
+
+If you want to set up a new Datamint instance for each test suite, you can do so by creating a new instance and starting it in the `beforeAll` method and stopping it in the `afterAll` method. Here's an example:
+
+```ts filename="pg.test.ts" copy
+const mint = new Datamint(DatabaseType.MYSQL, {
+  name: "test",
+  password: "test",
+  user: "test",
+});
+const client = new DatamintClient(DatabaseType.MYSQL, mockConfig);
+
+describe("Datamint Test", () => {
+  const tableName = "your_table_name";
+
+  beforeAll(async () => await mint.start());
+  afterAll(async () => await mint.stop());
+
+  beforeEach(async () => {
+    await client.connect();
+    await client.createTable("test", {
+      id: "INT AUTO_INCREMENT PRIMARY KEY",
+      name: "VARCHAR(255)",
+    });
+  });
+
+  afterEach(async () => {
+    await client.reset();
+    await client.disconnect();
+  });
+
+  it("should insert data into the specified table correctly", async () => {
+    const mockData = [{ id: 1, name: "John" }];
+    await client.insert(tableName, mockData);
+
+    const result = await client.find(tableName, { id: 1 });
+
+    expect(result[0]).toEqual({ id: 1, name: "John" });
+  });
+});
+```
+
 ## Providing a Custom Database Connection String
 
 If you have your own database and you're not using Datamint containers, you can provide your own connection string. Here's how you can do it:
