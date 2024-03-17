@@ -16,8 +16,8 @@ const client = new DatamintClient(DatabaseType.MYSQL, mockConfig);
 describe("MySQLPlugin", () => {
   const collectionName = "test";
 
-  beforeAll(() => mint.start());
-  afterAll(() => mint.stop());
+  beforeAll(async () => await mint.start());
+  afterAll(async () => await mint.stop());
 
   beforeEach(async () => {
     await client.connect();

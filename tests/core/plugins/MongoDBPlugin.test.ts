@@ -22,8 +22,8 @@ class TestableMongoDBPlugin extends MongoDBPlugin {
 describe("MongoDBPlugin", () => {
   let plugin: TestableMongoDBPlugin;
 
-  beforeAll(() => mint.start());
-  afterAll(() => mint.stop());
+  beforeAll(async () => await mint.start());
+  afterAll(async () => await mint.stop());
 
   beforeEach(async () => {
     plugin = new TestableMongoDBPlugin();

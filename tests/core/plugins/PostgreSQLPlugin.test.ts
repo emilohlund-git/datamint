@@ -16,8 +16,8 @@ const client = new DatamintClient(DatabaseType.POSTGRESQL, mockConfig);
 describe("PostgreSQLPlugin", () => {
   const collectionName = "test";
 
-  beforeAll(() => mint.start());
-  afterAll(() => mint.stop());
+  beforeAll(async () => await mint.start());
+  afterAll(async () => await mint.stop());
 
   beforeEach(async () => {
     await client.connect();

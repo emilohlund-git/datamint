@@ -4,29 +4,30 @@ import { DatabaseType } from "../enums";
 import { DatabaseOptions } from "../interfaces";
 import { DatabasePlugin } from "../plugins";
 
-export function createWithDatamint<T extends DatabasePlugin>(
+export function withDatamint<T extends DatabasePlugin>(
   database: DatabaseType,
-  options: DatabaseOptions
+  options: DatabaseOptions,
+  testSuite: (client: DatamintClient<T>) => void
 ) {
-  return (testSuite: (client: DatamintClient<T>) => void) => {
-    let mint: Datamint<T> = new Datamint(database, options);
-    let client: DatamintClient<T> = new DatamintClient(database, options);
+  let mint: Datamint<T>;
+  let client: DatamintClient<T>;
 
-    return {
-      setup: async () => {
-        await mint.start();
-        await client.connect();
+  return {
+    setup: async () => {
+      mint = new Datamint(database, options);
+      client = new DatamintClient<T>(database, options);
+      await mint.start();
+      await client.connect();
 
-        return { mint, client };
-      },
-      teardown: async () => {
-        await client.reset();
-        await client.disconnect();
-        await mint.stop();
-      },
-      run: () => {
-        testSuite(client);
-      },
-    };
+      return { mint, client };
+    },
+    teardown: async () => {
+      await client.reset();
+      await client.disconnect();
+      await mint.stop();
+    },
+    run: () => {
+      testSuite(client);
+    },
   };
 }
