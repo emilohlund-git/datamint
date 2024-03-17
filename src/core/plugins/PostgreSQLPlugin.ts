@@ -1,4 +1,4 @@
-import pgPromise, { IDatabase } from "pg-promise";
+import pg, { Client } from "pg";
 import {
   AggregateQuery,
   Condition,
@@ -11,13 +11,10 @@ import {
 import { BasePlugin } from "../plugins/BasePlugin";
 import { ensureDatabaseException } from "src/core/utils";
 
-export class PostgreSQLPlugin extends BasePlugin<IDatabase<any>> {
-  private _pgp: pgPromise.IMain;
-
+export class PostgreSQLPlugin extends BasePlugin<Client> {
   async connect(connectionString: string): Promise<void> {
-    this._pgp = pgPromise();
-    this._client = this._pgp(connectionString);
     try {
+      this._client = new Client(connectionString);
       await this._client.connect();
     } catch (err: unknown) {
       const error = ensureDatabaseException(err);
@@ -26,15 +23,12 @@ export class PostgreSQLPlugin extends BasePlugin<IDatabase<any>> {
   }
 
   async reset(database: string): Promise<void> {
-    await this.client.none("DROP SCHEMA public CASCADE");
-    await this.client.none("CREATE SCHEMA public");
+    await this.client.query("DROP SCHEMA public CASCADE");
+    await this.client.query("CREATE SCHEMA public");
   }
 
   async disconnect(): Promise<void> {
-    return new Promise((resolve) => {
-      this._pgp.end();
-      resolve();
-    });
+    await this.client.end();
   }
 
   async find(tableName: string, conditions: FindQuery): Promise<any[]> {
@@ -54,25 +48,27 @@ export class PostgreSQLPlugin extends BasePlugin<IDatabase<any>> {
     const values = Object.values(conditions).flat();
     const query = `SELECT * FROM ${tableName} WHERE ${whereClauses};`;
 
-    return this.client.manyOrNone(query, values);
+    const result = await this.client.query(query, values);
+
+    return result.rows;
   }
 
   async update(tableName: string, query: UpdateQuery): Promise<any> {
     const sql = `UPDATE ${tableName} SET ${this.objectToSql(
       query.update
     )} WHERE ${this.objectToSql(query.filter)}`;
-    const [result] = await this.client.query(sql);
-    return result;
+    const result = await this.client.query(sql);
+    return result.rows;
   }
 
   async delete(tableName: string, query: DeleteQuery): Promise<any> {
     const sql = `DELETE FROM ${tableName} WHERE ${this.objectToSql(query)}`;
-    const [result] = await this.client.query(sql);
-    return result;
+    const result = await this.client.query(sql);
+    return result.rows;
   }
 
   protected escapeValue(value: any): string {
-    return this._pgp.as.value(value);
+    return value;
   }
 
   async insert(tableName: string, data: InsertQuery): Promise<void> {
@@ -83,21 +79,21 @@ export class PostgreSQLPlugin extends BasePlugin<IDatabase<any>> {
         .join(", "); // Creates placeholders like $1, $2
       const values = Object.values(row);
       const query = `INSERT INTO ${tableName} (${fields}) VALUES (${placeholders});`;
-      await this.client.none(query, values); // Pass values as the second parameter for parameterized query
+      await this.client.query(query, values);
     }
   }
 
   async count(tableName: string, query: CountQuery): Promise<number> {
     const whereClause = this.objectToSql(query);
     const sql = `SELECT COUNT(*) FROM ${tableName} WHERE ${whereClause}`;
-    const [{ count }] = await this.client.query(sql);
-    return +count;
+    const result = await this.client.query(sql);
+    return result.rows[0].count;
   }
 
   async aggregate(tableName: string, query: AggregateQuery): Promise<any> {
     const sql = this.translateAggregateQuery(tableName, query);
-    const [rows] = await this.client.query(sql);
-    return rows;
+    const result = await this.client.query(sql);
+    return result.rows;
   }
 
   async createTable(
@@ -111,7 +107,7 @@ export class PostgreSQLPlugin extends BasePlugin<IDatabase<any>> {
     const createTableSql = `CREATE TABLE IF NOT EXISTS ${tableName} (${fields});`;
 
     try {
-      await this.client.none(createTableSql);
+      await this.client.query(createTableSql);
     } catch (err: unknown) {
       const error = ensureDatabaseException(err);
       throw new Error(`Failed to create table: ${error.message}`);
@@ -120,9 +116,9 @@ export class PostgreSQLPlugin extends BasePlugin<IDatabase<any>> {
 
   async listTables(): Promise<{ name: string }[]> {
     const query = `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';`;
-    const tables = await this.client.manyOrNone(query);
+    const tables = await this.client.query(query);
 
-    return tables.map((table) => table.table_name);
+    return tables.rows.map((table) => table.table_name);
   }
 
   protected translateAggregateQuery(

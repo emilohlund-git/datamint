@@ -46,7 +46,7 @@ describe("PostgreSQLPlugin", () => {
 
         const expectedResult = { key: "value1", count: "2" };
 
-        expect(result).toEqual(expectedResult);
+        expect(result).toEqual([expectedResult]);
       });
     }
   );
