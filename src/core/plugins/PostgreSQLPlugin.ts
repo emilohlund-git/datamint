@@ -31,7 +31,10 @@ export class PostgreSQLPlugin extends BasePlugin<IDatabase<any>> {
   }
 
   async disconnect(): Promise<void> {
-    this._pgp.end();
+    return new Promise((resolve) => {
+      this._pgp.end();
+      resolve();
+    });
   }
 
   async find(tableName: string, conditions: FindQuery): Promise<any[]> {

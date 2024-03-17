@@ -10,7 +10,7 @@ export const ensureDockerException = (value: unknown): DockerException => {
   } catch {}
 
   const error = new DockerException(
-    `This value was thrown as is, not through an Error: ${stringified}`
+    `${stringified}`
   );
   return error;
 };
@@ -24,7 +24,7 @@ export const ensureDatabaseException = (value: unknown): DatabaseException => {
   } catch {}
 
   const error = new DatabaseException(
-    `This value was thrown as is, not through an Error: ${stringified}`
+    `${stringified}`
   );
   return error;
 };
