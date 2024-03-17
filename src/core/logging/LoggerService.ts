@@ -19,6 +19,17 @@ export class LoggerService {
   static emojis?: boolean = true;
   static styles?: boolean = true;
 
+  static debug(message: string) {
+    this.log(
+      message,
+      Emoji.DEBUG,
+      LogColor.MAGENTA,
+      LogStyle.BRIGHT,
+      Verbosity.INFO,
+      BackgroundColor.BLACK
+    );
+  }
+
   static info(
     message: string,
     emoji: Emoji,

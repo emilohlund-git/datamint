@@ -58,20 +58,27 @@ export class DockerManager<T extends DatabasePlugin> extends Observer<
     );
 
     await this.handleContainerOperation(async () => {
+      LoggerService.debug(`Pulling docker image for ${this.database}...`);
       await this.service.pullImage(this.dockerContainerPath, this.database);
+      LoggerService.debug(`Pulled docker image for ${this.database}...`);
+      LoggerService.debug(`Starting docker container for ${this.database}...`);
       await this.service.startContainer(
         this.dockerContainerPath,
         this.database
       );
       this.hasRunningContainer = true;
-
+      LoggerService.debug(`Started docker container for ${this.database}...`);
+      LoggerService.debug(`Checking database connection for ${this.database}...`);
       await this.client.checkDatabaseConnection();
+      LoggerService.debug(`Connection successful for ${this.database}...`);
     }, "start");
   }
 
   async stopContainer() {
     if (!this.hasRunningContainer) {
+      LoggerService.debug(`Cleaning non-running container for ${this.database}...`);
       await this.fileProcessor.cleanupTempDir(this.tempDir);
+      LoggerService.debug(`Cleaned up non-running container for ${this.database}...`);
       return null;
     }
 

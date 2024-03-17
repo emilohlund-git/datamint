@@ -10,6 +10,7 @@ export enum Emoji {
   MYSQL = "🐬",
   POSTGRESQL = "🐘",
   MONGODB = "🍃",
+  DEBUG = "🐞",
   REDIS = "🔴",
   RABBITMQ = "🐇",
   ELASTICSEARCH = "🔍",

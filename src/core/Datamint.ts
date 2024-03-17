@@ -1,6 +1,6 @@
 import { DatabasePlugin } from "./plugins/DatabasePlugin";
 import { DatabaseOptions } from "./interfaces/DatabaseOptions";
-import { DatabaseType, Emoji } from "./enums";
+import { DatabaseType, Emoji, LogColor, LogStyle } from "./enums";
 import { DatamintManager } from "./DatamintManager";
 import { DockerManager } from "./docker/DockerManager";
 import { LoggerService } from "./logging/LoggerService";
@@ -16,7 +16,7 @@ export class Datamint<T extends DatabasePlugin> extends Observer<
   constructor(database: DatabaseType, options: DatabaseOptions) {
     super(database);
 
-    console.log("Datamint created with database: ", database, " and options: ", options);
+    LoggerService.debug(`Creating a new ${database} Datamint...`);
     this.fileProcessor = new FileProcessor(database);
     this.fileProcessor.addObserver(this);
 
@@ -35,14 +35,19 @@ export class Datamint<T extends DatabasePlugin> extends Observer<
 
   async start() {
     DatamintManager.addInstance(this);
+    LoggerService.debug(`Starting the ${this.database} Datamint...`);
     await this.dockerManager.startContainer();
+    LoggerService.debug(`Started the ${this.database} Datamint...`);
   }
 
   async stop() {
+    LoggerService.debug(`Stopping the ${this.database} Datamint...`);
     await this.dockerManager.stopContainer();
+    LoggerService.debug(`Stopped the ${this.database} Datamint...`);
   }
 
   protected async gracefulShutdown() {
+    LoggerService.debug(`Started graceful shutdown of the ${this.database} Datamint...`);
     const index = DatamintManager.getInstanceIndex(this);
     if (index > -1) {
       LoggerService.info(
