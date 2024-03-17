@@ -1,0 +1,85 @@
+# MySQL Plugin
+
+The `MySQL Plugin` is a part of the Datamint library. It provides an interface to interact with MySQL databases.
+
+## Properties
+
+- `_client`: An instance of `MongoClient` from the MySQL Node.js MongoDriverError. It's responsible for performing database operations.
+
+## Constructor
+
+The constructor for the `MySQL Plugin` does not take any parameters.
+
+### Example
+
+```typescript
+const plugin = new MySQLPlugin();
+```
+
+## Methods
+
+- `connect(connectionString: string)`
+
+This asynchronous method connects to the MySQL database using the provided connection string.
+
+- `disconnect()`
+
+This asynchronous method disconnects from the MySQL database.
+
+- `reset(database: string)`
+
+This asynchronous method resets the database by dropping all the collections.
+
+- `find(collectionName: stringify, query: FindQuery)`
+
+This asynchronous method finds documents in the specified collection using the provided query.
+
+- `insert(collectionName: string, documents: any[])`
+
+This asynchronous method inserts documents into the specified collection.
+
+- `update(collectionName: string, query: UpdateQuery, update: UpdateQuery)`
+
+This asynchronous method updates documents in the specified collection using the provided query and update.
+
+- `delete(collectionName: string, query: DeleteQuery)`
+
+This asynchronous method deletes documents from the specified collection using the provided query.
+
+- `count(collectionName: stringify, query: CountQuery)`
+
+This asynchronous method counts documents in the specified collection using the provided query.
+
+- `aggregate(collectionName: string, query: AggregateQuery)`
+
+This asynchronous method performs an aggregation on the specified collection using the provided query.
+
+- `createTable(collectionName: string, schema?: object)`
+
+This asynchronous method creates a collection in the database with the specified name and schema.
+
+- `listTables()`
+
+This asynchronous method lists all the collections in the database.
+
+### Example
+
+Here's an example of how to use the `MySQLPlugin` class:
+
+```typescript
+const plugin = new MySQLPlugin();
+
+// Connect to the database
+await plugin.connect("mysql://localhost:27017");
+
+// Insert a document into a collection
+await plugin.insert("users", [{ name: "John Doe", age: 25 }]);
+
+// Find a document in a collection
+const users = await plugin.find("users", { name: "John Doe" });
+
+// Disconnect from the database
+await plugin.disconnect();
+```
+
+Remember to replace the connection string with the appropriate one for your MySQL database.

@@ -1,0 +1,101 @@
+# BasePlugin Class
+
+The `BasePlugin` class is an abstract class that provides a base for all database plugins in the Datamint library. It defines the common interface and some utility methods that can be used by all database plugins.
+
+## Properties
+
+- `_client`: An instance of the database client. The type of this client depends on the specific database plugin.
+
+## Constructor
+
+The constructor for the `BasePlugin` class does not take any parameters.
+
+## Methods
+
+- `ensureConnection()`
+
+This method checks if the plugin is connected to a database. If not, it throws an error.
+
+- `client`
+
+This getter method returns the database client. It ensures that the plugin is connected to a database before returning the client.
+
+- `connect(connectionString: string)`
+
+This abstract method should connect to the database using the provided connection string.
+
+- `reset(database: string)`
+
+This abstract method should reset the database. It will delete all data and reset the schema.
+
+- `disconnect()`
+
+This abstract method should disconnect from the database.
+
+- `find(collectionName: string, query: FindQuery)`
+
+This abstract method should find documents in a collection that match the provided query.
+
+- `update(collectionName: string, query: UpdateQuery)`
+
+This abstract method should update documents in a collection that match the provided query.
+
+- `delete(collectionName: string, query: DeleteQuery)`
+
+This abstract method should delete documents in a collection that match the provided query.
+
+- `insert(collectionName: string, data: InsertQuery)`
+
+This abstract method should insert documents into a collection.
+
+- `createTable(collectionName: string, schema?: object)`
+
+This abstract method should create a new collection in the database with the provided name and optional schema.
+
+- `listTables()`
+
+This abstract method should list all collections in the database.
+
+- `count(collectionName: string, query: object)`
+
+This abstract method should count the number of documents in a collection that match the provided query.
+
+- `aggregate(collectionName: string, query: AggregateQuery)`
+
+This abstract method should perform an aggregation operation on a collection using the provided query.
+
+- `objectToSql(query: object)`
+
+This method converts a query object to a SQL string.
+
+- `escapeValue(value: any)`
+
+This abstract method should escape a value for use in a SQL query.
+
+- `translateAggregateQuery(tableName: string, query: AggregateQuery)`
+
+This method translates an aggregate query to a SQL string.
+
+- `translateSortStage(sort: { [key: string]: 1 | -1 })`
+
+This method translates a sort stage to a SQL string.
+
+- `translateMatchStage(match: { [key: string]: string | number | Condition })`
+
+This method translates a match stage to a SQL string.
+
+- `translateComplexCondition(field: string, condition: Condition)`
+
+This method translates a complex condition to a SQL string.
+
+## Example
+
+Because `BasePlugin` is an abstract class, you cannot create an instance of it directly. Instead, you should create a class that extends BasePlugin and implements all of its abstract methods. Here's an example of how to do this:
+
+```typescript
+class MyDatabasePlugin extends BasePlugin<DatabaseClient> {
+  // Implement all abstract methods here
+}
+```
+
+In this example, `DatabaseClient` is the type of the database client that your plugin uses. You should replace it with the actual type of your database client.
