@@ -1,8 +1,10 @@
-import { DatamintClient } from "src/core/database";
+import { DatamintClient } from "../database";
 import { Datamint } from "../Datamint";
 import { DatabaseType } from "../enums";
 import { DatabaseOptions } from "../interfaces";
-import { DatabasePlugin } from "src/core/plugins";
+import { DatabasePlugin } from "../plugins";
+import { LoggerService } from "../logging";
+import { ensureDatabaseException, ensureDockerException } from "../utils";
 
 export function withDatamint<T extends DatabasePlugin>(
   database: DatabaseType,
@@ -26,7 +28,17 @@ export function withDatamint<T extends DatabasePlugin>(
       try {
         await testSuite(client);
       } catch (err: unknown) {
-        await mint.stop();
+        const error = ensureDatabaseException(err);
+        LoggerService.error(`Error running test suite: ${error.message}`);
+        try {
+          await mint.stop();
+        } catch (err: unknown) {
+          const error = ensureDockerException(err);
+          LoggerService.error(
+            `Error stopping Docker container: ${error.message}`
+          );
+          process.exit(1);
+        }
       }
     },
   };
