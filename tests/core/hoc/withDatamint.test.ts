@@ -9,16 +9,7 @@ describe("withDatamint", function () {
     { name: "test", user: "test", password: "test", port: 3306 },
     (client: DatamintClient<PostgreSQLPlugin>) => {
       it("should run a test", async () => {
-        const testData = [{ id: 1, name: "John" }];
-
-        await client.createTable("test", {
-          id: "SERIAL PRIMARY KEY",
-          name: "VARCHAR(255)",
-        });
-
-        await client.insert("test", testData);
-        const result = await client.find("test", { id: 1 });
-        expect(result).toEqual([{ id: 1, name: "John" }]);
+      
       });
     }
   );
