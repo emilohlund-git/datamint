@@ -1,18 +1,18 @@
 import { DatamintClient } from "@datamint/core/database";
 import { DatabaseType } from "@datamint/core/enums";
 import { withDatamint } from "@datamint/core/hoc/withDatamint";
-import { MySQLPlugin } from "@datamint/core/plugins";
+import { PostgreSQLPlugin } from "@datamint/core/plugins";
 
 describe("withDatamint", function () {
   const { setup, teardown, run } = withDatamint(
-    DatabaseType.MYSQL,
+    DatabaseType.POSTGRESQL,
     { name: "test", user: "test", password: "test", port: 3306 },
-    (client: DatamintClient<MySQLPlugin>) => {
+    (client: DatamintClient<PostgreSQLPlugin>) => {
       it("should run a test", async () => {
         const testData = [{ id: 1, name: "John" }];
 
         await client.createTable("test", {
-          id: "INT AUTO_INCREMENT PRIMARY KEY",
+          id: "SERIAL PRIMARY KEY",
           name: "VARCHAR(255)",
         });
 
