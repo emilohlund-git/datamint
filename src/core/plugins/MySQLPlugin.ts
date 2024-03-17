@@ -18,7 +18,9 @@ export class MySQLPlugin extends BasePlugin<mysql.Connection> {
       return await this._client.connect();
     } catch (err: unknown) {
       const error = ensureDatabaseException(err);
-      throw new DatabaseException(`Failed to connect to the database: ${error.message}`);
+      throw new DatabaseException(
+        `Failed to connect to the database: ${error.message}`
+      );
     }
   }
 
