@@ -15,7 +15,7 @@ describe("PostgreSQLPlugin", () => {
   const { setup, teardown, run } = withDatamint(
     DatabaseType.POSTGRESQL,
     mockConfig,
-    async (client: DatamintClient<PostgreSQLPlugin>) => {
+    (client: DatamintClient<PostgreSQLPlugin>) => {
       beforeEach(async () => {
         await client.reset();
       });

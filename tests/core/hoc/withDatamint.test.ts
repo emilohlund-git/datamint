@@ -7,7 +7,7 @@ describe("withDatamint", function () {
   const { setup, teardown, run } = withDatamint(
     DatabaseType.MYSQL,
     { name: "test", user: "test", password: "test", port: 3306 },
-    async (client: DatamintClient<MySQLPlugin>) => {
+    (client: DatamintClient<MySQLPlugin>) => {
       it("should run a test", async () => {
         const testData = [{ id: 1, name: "John" }];
 

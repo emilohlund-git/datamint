@@ -15,7 +15,7 @@ describe("MySQLPlugin", () => {
   const { setup, teardown, run } = withDatamint(
     DatabaseType.MYSQL,
     mockConfig,
-    async (client: DatamintClient<MySQLPlugin>) => {
+    (client: DatamintClient<MySQLPlugin>) => {
       beforeEach(async () => {
         await client.reset();
       });

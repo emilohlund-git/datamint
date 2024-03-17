@@ -7,7 +7,7 @@ import { DatabasePlugin } from "../plugins";
 export function withDatamint<T extends DatabasePlugin>(
   database: DatabaseType,
   options: DatabaseOptions,
-  testSuite: (client: DatamintClient<T>) => Promise<void>
+  testSuite: (client: DatamintClient<T>) => void
 ) {
   const mint = new Datamint(database, options);
   const client = new DatamintClient<T>(database, options);
