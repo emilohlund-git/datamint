@@ -16,6 +16,7 @@ export class Datamint<T extends DatabasePlugin> extends Observer<
   constructor(database: DatabaseType, options: DatabaseOptions) {
     super(database);
 
+    console.log("Datamint created with database: ", database, " and options: ", options);
     this.fileProcessor = new FileProcessor(database);
     this.fileProcessor.addObserver(this);
 
