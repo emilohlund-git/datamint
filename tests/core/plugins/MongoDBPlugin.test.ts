@@ -20,7 +20,7 @@ describe("MongoDBPlugin", () => {
   const { setup, teardown, run } = withDatamint(
     DatabaseType.MONGODB,
     mockConfig,
-    (client: DatamintClient<MongoDBPlugin>) => {
+    async (client: DatamintClient<MongoDBPlugin>) => {
       let plugin: TestableMongoDBPlugin;
 
       beforeEach(async () => {

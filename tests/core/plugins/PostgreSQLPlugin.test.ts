@@ -15,11 +15,7 @@ describe("PostgreSQLPlugin", () => {
   const { setup, teardown, run } = withDatamint(
     DatabaseType.POSTGRESQL,
     mockConfig,
-    (client: DatamintClient<PostgreSQLPlugin>) => {
-      beforeEach(async () => {
-        await client.reset();
-      });
-
+    async (client: DatamintClient<PostgreSQLPlugin>) => {
       test("aggregate method", async () => {
         const collectionName = "test";
 

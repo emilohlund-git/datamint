@@ -132,7 +132,6 @@ export class DatamintClient<T extends DatabasePlugin> {
       try {
         await this._plugin.connect(connectionString);
 
-        stopSpinner();
         LoggerService.success(
           `Successfully connected to the ${this.database} database.`,
           Emoji.CHECK
@@ -156,6 +155,8 @@ export class DatamintClient<T extends DatabasePlugin> {
           LogStyle.DIM
         );
         await new Promise((resolve) => setTimeout(resolve, interval));
+      } finally {
+        stopSpinner();
       }
     }
 
