@@ -17,6 +17,7 @@ export class MongoDBPlugin extends BasePlugin<MongoClient> {
     try {
       this._client = new MongoClient(connectionString);
       await this._client.connect();
+      return;
     } catch (err: unknown) {
       const error = ensureDatabaseException(err);
       throw new DatabaseException(error.message);
@@ -32,7 +33,7 @@ export class MongoDBPlugin extends BasePlugin<MongoClient> {
 
   async disconnect(): Promise<void> {
     try {
-      await this.client.close();
+      return await this.client.close();
     } catch (err: unknown) {
       const error = ensureDatabaseException(err);
       LoggerService.error(error.message);
