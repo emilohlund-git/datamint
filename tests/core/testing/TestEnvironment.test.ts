@@ -1,5 +1,5 @@
 import { DatabaseType } from "@datamint/core/enums";
-import { withDatamint } from "@datamint/core/testing";
+import { createTestEnvironment } from "@datamint/core/testing";
 
 const mongoConfig = {
   name: "mongo",
@@ -16,7 +16,7 @@ const mysqlConfig = {
 };
 
 describe("TestEnvironment", () => {
-  const datamint = withDatamint(DatabaseType.MONGODB, mongoConfig);
+  const datamint = createTestEnvironment(DatabaseType.MONGODB, mongoConfig)();
 
   beforeAll(async () => {
     await datamint.setup();
@@ -37,7 +37,7 @@ describe("TestEnvironment", () => {
 });
 
 describe("Two tests using the withDatamint HOC", () => {
-  const datamint = withDatamint(DatabaseType.MYSQL, mysqlConfig);
+  const datamint = createTestEnvironment(DatabaseType.MYSQL, mysqlConfig)();
 
   beforeAll(async () => {
     await datamint.setup();
