@@ -95,7 +95,7 @@ describe("MongoDBPlugin", () => {
 
   test("create table", async () => {
     const collectionName = "test";
-    await client.createTable(collectionName);
+    await client.createTable(collectionName, { type: "object" });
     const collections = await client.listTables();
     expect(collections.map((c) => c.name)).toContain(collectionName);
   });

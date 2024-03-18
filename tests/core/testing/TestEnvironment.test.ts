@@ -9,50 +9,46 @@ const config = {
 };
 
 describe("TestEnvironment", () => {
-  const { setup, teardown, run } = withDatamint(
-    DatabaseType.MONGODB,
-    config,
-    (client) => {
-      beforeEach(async () => {
-        await client.reset();
-      });
+  const datamint = withDatamint(DatabaseType.MONGODB, config);
 
-      test("should aggregate a query", async () => {
-        const query = [{ $match: { name: "test" } }];
-        const result = await client.aggregate("test", query);
-        expect(result).toBeDefined();
-        expect(result).toEqual([]);
-      });
-    }
-  );
+  beforeAll(async () => {
+    await datamint.setup();
+  });
 
-  beforeAll(async () => await setup());
-  afterAll(async () => await teardown());
-  run();
+  afterAll(async () => {
+    await datamint.teardown();
+  });
+
+  test("should run tests with Datamint", async () => {
+    await datamint.client.reset();
+
+    const query = [{ $match: { name: "test" } }];
+    const result = await datamint.client.aggregate("test", query);
+    expect(result).toBeDefined();
+    expect(result).toEqual([]);
+  });
 });
 
 describe("Two tests using the withDatamint HOC", () => {
-  const { setup, teardown, run } = withDatamint(
-    DatabaseType.MYSQL,
-    config,
-    (client) => {
-      beforeEach(async () => {
-        await client.reset();
-        await client.createTable("test", {
-          name: "VARCHAR(255)",
-        });
-      });
+  const datamint = withDatamint(DatabaseType.MYSQL, config);
 
-      test("should aggregate a query", async () => {
-        const query = [{ $match: { name: "test" } }];
-        const result = await client.aggregate("test", query);
-        expect(result).toBeDefined();
-        expect(result).toEqual([]);
-      });
-    }
-  );
+  beforeAll(async () => {
+    await datamint.setup();
+  });
 
-  beforeAll(async () => await setup());
-  afterAll(async () => await teardown());
-  run();
+  afterAll(async () => {
+    await datamint.teardown();
+  });
+
+  test("should run tests with Datamint", async () => {
+    await datamint.client.reset();
+    await datamint.client.createTable("test", {
+      name: "VARCHAR(255)",
+    });
+
+    const query = [{ $match: { name: "test" } }];
+    const result = await datamint.client.aggregate("test", query);
+    expect(result).toBeDefined();
+    expect(result).toEqual([]);
+  });
 });

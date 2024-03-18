@@ -33,8 +33,7 @@ class TestEnvironment<T extends DatabasePlugin> {
 
 export function withDatamint<K extends DatabaseType>(
   database: K,
-  config: DatabaseOptions,
-  testSuite: (client: DatamintClient<DatabasePluginMap[K]>) => void
+  config: DatabaseOptions
 ) {
   const environment = new TestEnvironment<DatabasePluginMap[K]>(
     database,
@@ -42,19 +41,15 @@ export function withDatamint<K extends DatabaseType>(
   );
   const client = new DatamintClient<DatabasePluginMap[K]>(database, config);
 
-  const setup = async () => {
-    await environment.setup();
-    await client.connect();
+  return {
+    client,
+    setup: async () => {
+      await environment.setup();
+      await client.connect();
+    },
+    teardown: async () => {
+      await client.disconnect();
+      await environment.teardown();
+    },
   };
-
-  const teardown = async () => {
-    await client.disconnect();
-    await environment.teardown();
-  };
-
-  const run = () => {
-    testSuite(client);
-  };
-
-  return { setup, teardown, run };
 }
