@@ -16,46 +16,54 @@ const mysqlConfig = {
 };
 
 describe("TestEnvironment", () => {
-  const datamint = createTestEnvironment(DatabaseType.MONGODB, mongoConfig)();
+  describe("MongoDB", () => {
+    const { setup, teardown, client } = createTestEnvironment(
+      DatabaseType.MONGODB,
+      mongoConfig
+    )();
 
-  beforeAll(async () => {
-    await datamint.setup();
-  });
-
-  afterAll(async () => {
-    await datamint.teardown();
-  });
-
-  test("should run tests with Datamint", async () => {
-    await datamint.client.reset();
-
-    const query = [{ $match: { name: "test" } }];
-    const result = await datamint.client.aggregate("test", query);
-    expect(result).toBeDefined();
-    expect(result).toEqual([]);
-  });
-});
-
-describe("Two tests using the withDatamint HOC", () => {
-  const datamint = createTestEnvironment(DatabaseType.MYSQL, mysqlConfig)();
-
-  beforeAll(async () => {
-    await datamint.setup();
-  });
-
-  afterAll(async () => {
-    await datamint.teardown();
-  });
-
-  test("should run tests with Datamint", async () => {
-    await datamint.client.reset();
-    await datamint.client.createTable("test", {
-      name: "VARCHAR(255)",
+    beforeAll(async () => {
+      await setup();
     });
 
-    const query = [{ $match: { name: "test" } }];
-    const result = await datamint.client.aggregate("test", query);
-    expect(result).toBeDefined();
-    expect(result).toEqual([]);
+    afterAll(async () => {
+      await teardown();
+    });
+
+    test("should run tests with Datamint", async () => {
+      await client.reset();
+
+      const query = [{ $match: { name: "test" } }];
+      const result = await client.aggregate("test", query);
+      expect(result).toBeDefined();
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe("MySQL", () => {
+    const { setup, teardown, client } = createTestEnvironment(
+      DatabaseType.MYSQL,
+      mysqlConfig
+    )();
+
+    beforeAll(async () => {
+      await setup();
+    });
+
+    afterAll(async () => {
+      await teardown();
+    });
+
+    test("should run tests with Datamint", async () => {
+      await client.reset();
+      await client.createTable("test", {
+        name: "VARCHAR(255)",
+      });
+
+      const query = [{ $match: { name: "test" } }];
+      const result = await client.aggregate("test", query);
+      expect(result).toBeDefined();
+      expect(result).toEqual([]);
+    });
   });
 });
