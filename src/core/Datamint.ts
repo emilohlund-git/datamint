@@ -15,7 +15,6 @@ export class Datamint<T extends DatabasePlugin> extends Observer<
 
   constructor(database: DatabaseType, options: DatabaseOptions) {
     super(database);
-    LoggerService.verbosity = Verbosity.NONE;
     LoggerService.debug(`Creating a new ${database} Datamint...`);
     this.fileProcessor = new FileProcessor(database);
     this.fileProcessor.addObserver(this);
