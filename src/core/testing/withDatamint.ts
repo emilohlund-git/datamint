@@ -1,3 +1,4 @@
+import { LoggerService, Verbosity } from "../logging";
 import { Datamint } from "../Datamint";
 import { DatamintClient } from "../database";
 import { DatabaseType } from "../enums";
@@ -35,6 +36,7 @@ export function withDatamint<K extends DatabaseType>(
   database: K,
   config: DatabaseOptions
 ) {
+  LoggerService.verbosity = Verbosity.DEBUG;
   const environment = new TestEnvironment<DatabasePluginMap[K]>(
     database,
     config
@@ -44,12 +46,18 @@ export function withDatamint<K extends DatabaseType>(
   return {
     client,
     setup: async () => {
+      LoggerService.debug("Setting up the test environment");
       await environment.setup();
+      LoggerService.debug("Connecting to the database");
       await client.connect();
+      LoggerService.debug("Connected to the database");
     },
     teardown: async () => {
+      LoggerService.debug("Tearing down the test environment");
       await client.disconnect();
+      LoggerService.debug("Disconnected from the database");
       await environment.teardown();
+      LoggerService.debug("Test environment has been torn down");
     },
   };
 }
