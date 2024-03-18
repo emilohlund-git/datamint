@@ -70,7 +70,7 @@ export class DatamintClient<T extends DatabasePlugin> {
     return await this._plugin.listTables();
   }
 
-  async createTable(tableName: string, schema?: object): Promise<any> {
+  async createTable(tableName: string, schema: object): Promise<any> {
     if (schema && Object.keys(schema).length === 0) {
       throw new Error("Schema object should not be empty");
     }

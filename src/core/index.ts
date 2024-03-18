@@ -7,3 +7,4 @@ export * from "./docker";
 export * from "./DatamintManager";
 export * from "./database";
 export * from "./FileProcessor";
+export * from "./testing";
